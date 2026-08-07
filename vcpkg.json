@@ -1,0 +1,19 @@
+{
+    "name": "antares",
+    "version": "0.0.1",
+    "dependencies": [
+        "libplist",
+        "libusb",
+        {
+            "name": "openssl",
+            "version>=": "1.1.1n"
+        }
+    ],
+    "overrides": [
+        {
+            "name": "openssl",
+            "version": "1.1.1n"
+        }
+    ],
+    "builtin-baseline": "0878b5224d4a4968940ee296a2e7fae2d3b62983"
+}
