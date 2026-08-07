@@ -3,6 +3,11 @@
 
 Device::Device() {
     int success = libusb_init(&m_context);
+    
+    #ifdef _WIN32
+    libusb_set_option(m_context, LIBUSB_OPTION_USE_USBDK);
+    #endif
+
     if (success != LIBUSB_SUCCESS) {
         m_context = nullptr;
     }
@@ -36,7 +41,7 @@ bool Device::Open(void) {
         libusb_set_auto_detach_kernel_driver(m_deviceHandle, 1);
     }
     
-    int claimResult = libusb_claim_interface(m_deviceHandle, 0);
+    int claimResult = libusb_claim_interface(m_deviceHandle, m_mode == Mode::Normal ? 1 : 0);
     if (claimResult != LIBUSB_SUCCESS) {
         libusb_close(m_deviceHandle);
         m_deviceHandle = nullptr;

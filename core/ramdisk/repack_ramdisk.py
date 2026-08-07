@@ -1,14 +1,20 @@
 import shutil
 import subprocess
 import pathlib
+import platform
 
-SCRIPT_DIR        = pathlib.Path(__file__).parent
+SCRIPT_DIR = pathlib.Path(__file__).parent
 
-HFSPLUS_TOOL      = SCRIPT_DIR / "xpwn" / "bin" / "hfsplus"
 RAMDISK_ROOT_PATH = SCRIPT_DIR / "ramdisk_root"
-RAMDISK_IMG_PATH  = SCRIPT_DIR / "ramdisk.img"
-ZIBRI_DAT_PATH    = SCRIPT_DIR / "zibri.dat"
-FILES_PATH        = SCRIPT_DIR / "files"
+RAMDISK_IMG_PATH = SCRIPT_DIR / "ramdisk.img"
+ZIBRI_DAT_PATH = SCRIPT_DIR / "zibri.dat"
+FILES_PATH = SCRIPT_DIR / "files"
+
+def get_hfsplus() -> str:
+    if platform.system() == "Windows":
+        return SCRIPT_DIR / "xpwn" / "hfsplus.exe"
+    else:
+        return SCRIPT_DIR / "xpwn" / "bin" / "hfsplus"
 
 def clean_dsstore(root: pathlib.Path) -> None:
     for pattern in (".DS_Store", "._*"):
@@ -23,11 +29,11 @@ def add_folder(local_dir: pathlib.Path, hfs_dest: str) -> None:
         relative = local_file.relative_to(local_dir)
         hfs_path = f"{hfs_dest}/{relative.as_posix()}"
         subprocess.run(
-            [HFSPLUS_TOOL.as_posix(), RAMDISK_IMG_PATH.as_posix(), "rm", hfs_path],
+            [get_hfsplus().as_posix(), RAMDISK_IMG_PATH.as_posix(), "rm", hfs_path],
             capture_output=True
         )
         subprocess.run(
-            [HFSPLUS_TOOL.as_posix(), RAMDISK_IMG_PATH.as_posix(), "add",
+            [get_hfsplus().as_posix(), RAMDISK_IMG_PATH.as_posix(), "add",
              local_file.as_posix(), hfs_path],
             check=True
         )
@@ -35,7 +41,7 @@ def add_folder(local_dir: pathlib.Path, hfs_dest: str) -> None:
 
 def add_file(local_path: pathlib.Path, hfs_path: str) -> None:
     result = subprocess.run(
-        [HFSPLUS_TOOL.as_posix(), RAMDISK_IMG_PATH.as_posix(), "add", local_path.as_posix(), hfs_path],
+        [get_hfsplus().as_posix(), RAMDISK_IMG_PATH.as_posix(), "add", local_path.as_posix(), hfs_path],
         check=True,
         text=True
     )
@@ -47,10 +53,10 @@ def add_file(local_path: pathlib.Path, hfs_path: str) -> None:
 
 def replace_file(local_path: pathlib.Path, hfs_path: str) -> None:
     subprocess.run(
-        [HFSPLUS_TOOL.as_posix(), RAMDISK_IMG_PATH.as_posix(), "rm", hfs_path]
+        [get_hfsplus().as_posix(), RAMDISK_IMG_PATH.as_posix(), "rm", hfs_path]
     )
 
-    result = subprocess.run([HFSPLUS_TOOL.as_posix(), RAMDISK_IMG_PATH.as_posix(), "add", local_path.as_posix(), hfs_path], text=True)
+    result = subprocess.run([get_hfsplus().as_posix(), RAMDISK_IMG_PATH.as_posix(), "add", local_path.as_posix(), hfs_path], text=True)
     if result.returncode != 0:
         print(result.stdout)
         print(result.stderr)
@@ -59,7 +65,7 @@ def replace_file(local_path: pathlib.Path, hfs_path: str) -> None:
 
 def remove_folder(hfs_path: str) -> None:
     result = subprocess.run(
-        [HFSPLUS_TOOL.as_posix(), RAMDISK_IMG_PATH.as_posix(), "ls", hfs_path],
+        [get_hfsplus().as_posix(), RAMDISK_IMG_PATH.as_posix(), "ls", hfs_path],
         capture_output=True, text=True
     )
     for line in result.stdout.splitlines():
@@ -69,13 +75,13 @@ def remove_folder(hfs_path: str) -> None:
         filename = stripped.split()[-1]
         child = f"{hfs_path}/{filename}"
         subprocess.run(
-            [HFSPLUS_TOOL.as_posix(), RAMDISK_IMG_PATH.as_posix(), "rm", child],
+            [get_hfsplus().as_posix(), RAMDISK_IMG_PATH.as_posix(), "rm", child],
             capture_output=True
         )
         print(f"    [rm] {child}")
     
     subprocess.run(
-        [HFSPLUS_TOOL.as_posix(), RAMDISK_IMG_PATH.as_posix(), "rm", hfs_path],
+        [get_hfsplus().as_posix(), RAMDISK_IMG_PATH.as_posix(), "rm", hfs_path],
         capture_output=True 
     )
 
