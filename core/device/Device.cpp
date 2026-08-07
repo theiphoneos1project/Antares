@@ -1,5 +1,6 @@
 #include "Device.hpp"
 #include <iostream>
+#include <cstring>
 
 Device::Device() {
     int success = libusb_init(&m_context);
