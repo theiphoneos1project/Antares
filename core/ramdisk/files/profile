@@ -90,9 +90,7 @@ fi
 /bin/echo
 /bin/echo "======================================="
 /bin/echo "           !!! Attention !!!           "
-/bin/echo "If you want to fully bootstrap your de-"
-/bin/echo "vice, make sure to install the PXLdaem-" 
-/bin/echo "on and install the BSD base package. "
+/bin/echo "If you want to fully bootstrap your device, make sure to install the PXLdaemon and install the BSD base package."
 /bin/echo "======================================="   
 /bin/echo
 
