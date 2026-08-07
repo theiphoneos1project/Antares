@@ -51,6 +51,7 @@ public:
     ~Device();
 
     bool Open(void);
+    void Close(void);
 
     std::optional<Mode> GetMode(void) const { return m_mode; }
 

@@ -14,7 +14,10 @@ Device::Device() {
 }
 
 bool Device::Open(void) {
+    Close();
+
     if (m_context == nullptr) {
+        std::cerr << "[-] m_context == nullptr, returning\n";
         return false;
     }
 
@@ -52,12 +55,17 @@ bool Device::Open(void) {
     return true;
 }
 
-Device::~Device() {
+void Device::Close(void) {
     if (m_deviceHandle) {
-        libusb_release_interface(m_deviceHandle, 0);
+        libusb_release_interface(m_deviceHandle, m_mode == Mode::Normal ? 1 : 0);
         libusb_close(m_deviceHandle);
         m_deviceHandle = nullptr;
     }
+    m_mode = std::nullopt;
+}
+
+Device::~Device() {
+    Close();
     
     if (m_context) {
         libusb_exit(m_context);
