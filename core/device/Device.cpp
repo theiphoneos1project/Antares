@@ -1,6 +1,7 @@
 #include "Device.hpp"
 #include <iostream>
 #include <cstring>
+#include "usb/mux.h"
 
 Device::Device() {
     int success = libusb_init(&m_context);
@@ -18,42 +19,37 @@ bool Device::Open(void) {
     Close();
 
     if (m_context == nullptr) {
-        std::cerr << "[-] m_context == nullptr, returning\n";
         return false;
     }
-
+    
     m_deviceHandle = libusb_open_device_with_vid_pid(m_context, AppleVendorID, static_cast<uint16_t>(PID::Recovery));
     if (m_deviceHandle != NULL) {
         m_mode = Mode::Recovery;
-    } else {
-        m_deviceHandle = libusb_open_device_with_vid_pid(m_context, AppleVendorID, static_cast<uint16_t>(PID::NormaliPhone));
-        if (m_deviceHandle != NULL) {
-            m_mode = Mode::Normal;
-        } else {
-            m_deviceHandle = libusb_open_device_with_vid_pid(m_context, AppleVendorID, static_cast<uint16_t>(PID::NormaliPod));
-            if (m_deviceHandle != NULL) {
-                m_mode = Mode::Normal;
-            }
+        if (libusb_has_capability(LIBUSB_CAP_SUPPORTS_DETACH_KERNEL_DRIVER)) {
+            libusb_set_auto_detach_kernel_driver(m_deviceHandle, 1);
         }
+
+        libusb_set_configuration(m_deviceHandle, 1);
+        
+        int claimResult = libusb_claim_interface(m_deviceHandle, 0);
+        if (claimResult != LIBUSB_SUCCESS) {
+            std::cerr << "[-] Failed to claim recovery interface: " << libusb_error_name(claimResult) << "\n";
+            libusb_close(m_deviceHandle);
+            m_deviceHandle = nullptr;
+            m_mode = std::nullopt;
+            return false;
+        }
+        return true;
     }
 
-    if (!m_mode) {
-        return false;
+    uint8_t ep_out, ep_in;
+    int intf;
+    if (find_and_claim(m_context, &m_deviceHandle, &ep_out, &ep_in, &intf) == 0) {
+        m_mode = Mode::Normal;
+        return true;
     }
 
-    if (libusb_has_capability(LIBUSB_CAP_SUPPORTS_DETACH_KERNEL_DRIVER)) {
-        libusb_set_auto_detach_kernel_driver(m_deviceHandle, 1);
-    }
-    
-    int claimResult = libusb_claim_interface(m_deviceHandle, m_mode == Mode::Normal ? 1 : 0);
-    if (claimResult != LIBUSB_SUCCESS) {
-        libusb_close(m_deviceHandle);
-        m_deviceHandle = nullptr;
-        m_mode = std::nullopt;
-        return false;
-    }
-
-    return true;
+    return false;
 }
 
 void Device::Close(void) {
@@ -107,7 +103,7 @@ bool Device::SendCommand(std::string_view command) {
     memcpy(buffer.data(), command.data(), command.size());
 
     int transferred = 0;
-    int result = libusb_interrupt_transfer(m_deviceHandle, static_cast<unsigned char>(Endpoint::CommandOut), buffer.data(), static_cast<int>(paddedLength), &transferred, USBTimeout);
+    int result = libusb_bulk_transfer(m_deviceHandle, static_cast<unsigned char>(Endpoint::CommandOut), buffer.data(), static_cast<int>(paddedLength), &transferred, USBTimeout);
     if (result != LIBUSB_SUCCESS) {
         std::cerr << "[-] Command bulk transfer failed: " << libusb_error_name(result) << "\n";
         return false;
@@ -144,7 +140,7 @@ bool Device::SendFile(const std::vector<uint8_t>& data, uint32_t loadAddress) {
         unsigned char *chunk = const_cast<unsigned char *>(data.data()) + sent;
         
         int transferred = 0;
-        int result = libusb_interrupt_transfer(m_deviceHandle, static_cast<unsigned char>(Endpoint::FileOut), chunk, static_cast<int>(toSend), &transferred, USBTimeout);
+        int result = libusb_bulk_transfer(m_deviceHandle, static_cast<unsigned char>(Endpoint::FileOut), chunk, static_cast<int>(toSend), &transferred, USBTimeout);
         if (result != LIBUSB_SUCCESS) {
             std::cerr << "[-] File bulk transfer failed: " << libusb_error_name(result) << "\n";
             return false;
@@ -160,14 +156,14 @@ std::optional<iboot_message_t> Device::SendControl(iboot_message_t *message) {
     int result;
     
     int transferred = 0;
-    result = libusb_interrupt_transfer(m_deviceHandle, static_cast<unsigned char>(Endpoint::ControlOut), reinterpret_cast<unsigned char *>(message), sizeof(iboot_message_t), &transferred, USBTimeout);
+    result = libusb_bulk_transfer(m_deviceHandle, static_cast<unsigned char>(Endpoint::ControlOut), reinterpret_cast<unsigned char *>(message), sizeof(iboot_message_t), &transferred, USBTimeout);
     if (result != LIBUSB_SUCCESS) {
         std::cerr << "[-] Control OUT failed: " << libusb_error_name(result) << "\n";
         return std::nullopt;
     }
     
     iboot_message_t receivedMessage;
-    result = libusb_interrupt_transfer(m_deviceHandle, static_cast<unsigned char>(Endpoint::ControlIn), reinterpret_cast<unsigned char *>(&receivedMessage), sizeof(iboot_message_t), &transferred, USBTimeout);
+    result = libusb_bulk_transfer(m_deviceHandle, static_cast<unsigned char>(Endpoint::ControlIn), reinterpret_cast<unsigned char *>(&receivedMessage), sizeof(iboot_message_t), &transferred, USBTimeout);
     if (result != LIBUSB_SUCCESS) {
         std::cerr << "[-] Control IN failed: " << libusb_error_name(result) << "\n";
         return std::nullopt;

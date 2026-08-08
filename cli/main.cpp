@@ -39,6 +39,8 @@ int main(void) {
     if (*mode == Device::Mode::Normal) {
         std::cout << "[+] Sending device to recovery mode...\n";
 
+        device.Close();
+
         LockdownDaemonClient lockdowndClient;
         bool lockdowndOpened = lockdowndClient.Open();
         if (!lockdowndOpened) {
