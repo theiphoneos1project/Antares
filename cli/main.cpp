@@ -91,18 +91,25 @@ int main(void) {
     }
 
     std::cout << "Here we go!\n";
+
+    device.SendCommand("setpicture 0\n");
+    device.SendCommand("bgcolor 125 125 0\n");
     
     std::vector<uint8_t> ramdiskData;
     if (!LoadFile("core/ramdisk/ramdisk.img", ramdiskData)) {
         std::cerr << "[-] Failed to load zibri.dat\n";
+        device.SendCommand("bgcolor 125 0 0\n");
         return EXIT_FAILURE;
     }
     
     std::cout << "[+] Sending ramdisk...\n";
     if (!device.SendFile(ramdiskData, 0x09CC2000)) {
         std::cerr << "[-] Failed to send ramdisk!\n";
+        device.SendCommand("bgcolor 125 0 0\n");
         return EXIT_FAILURE;
     }
+
+    device.SendCommand("bgcolor 0 125 0\n");
 
     device.SendCommand("setenv boot-args \"rd=md0 -s -x pmd0=0x09CC2000.0x0133D000\"\n");
     device.SendCommand("saveenv\n");
