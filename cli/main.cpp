@@ -1,26 +1,27 @@
 #include <iostream>
+#include <optional>
 #include <fstream>
 #include <chrono>
 #include <thread>
 #include "device/Device.hpp"
 #include "lockdownd/LockdownDaemonClient.hpp"
 
-static bool LoadFile(const std::string& path, std::vector<uint8_t>& outData) {
+static constexpr auto RecoveryTimeout = std::chrono::seconds(15);
+
+static std::optional<std::vector<uint8_t>> LoadFile(const std::string& path) {
     std::ifstream file(path, std::ios::binary | std::ios::ate);
     if (!file.is_open()) {
-        return false;
+        return std::nullopt;
     }
     std::streamsize size = file.tellg();
     file.seekg(0, std::ios::beg);
 
-    outData.resize(size);
-    if (!file.read(reinterpret_cast<char *>(outData.data()), size)) {
-        return false;
+    std::vector<uint8_t> result(size);
+    if (!file.read(reinterpret_cast<char *>(result.data()), size)) {
+        return std::nullopt;
     }
-    return true;
+    return result;
 }
-
-static constexpr auto RecoveryTimeout = std::chrono::seconds(15);
 
 int main(void) {
     Device device;
@@ -95,15 +96,15 @@ int main(void) {
     device.SendCommand("setpicture 0\n");
     device.SendCommand("bgcolor 125 125 0\n");
     
-    std::vector<uint8_t> ramdiskData;
-    if (!LoadFile("core/ramdisk/ramdisk.img", ramdiskData)) {
+    auto ramdiskData = LoadFile("core/ramdisk/ramdisk.img");
+    if (!ramdiskData.has_value()) {
         std::cerr << "[-] Failed to load zibri.dat\n";
         device.SendCommand("bgcolor 125 0 0\n");
         return EXIT_FAILURE;
     }
     
     std::cout << "[+] Sending ramdisk...\n";
-    if (!device.SendFile(ramdiskData, 0x09CC2000)) {
+    if (!device.SendFile(*ramdiskData, 0x09CC2000)) {
         std::cerr << "[-] Failed to send ramdisk!\n";
         device.SendCommand("bgcolor 125 0 0\n");
         return EXIT_FAILURE;
