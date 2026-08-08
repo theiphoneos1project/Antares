@@ -8,6 +8,28 @@
 
 static constexpr auto RecoveryTimeout = std::chrono::seconds(15);
 
+#ifdef __linux__
+struct USBGuard {
+public:
+    USBGuard() {
+        long result = wxExecute("systemctl mask --now usbmuxd", wxEXEC_SYNC);
+        if (result == 0) {
+            m_masked = true;
+        }
+    }
+
+    ~USBGuard() {
+        if (m_masked) {
+            wxExecute("systemctl unmask --now usbmuxd", wxEXEC_SYNC);
+        }
+    }
+
+    bool DidSuccessfullyMask(void) const { return m_masked; }
+private:
+    bool m_masked = false;
+};
+#endif
+
 static std::optional<std::vector<uint8_t>> LoadFile(const std::string& path) {
     std::ifstream file(path, std::ios::binary | std::ios::ate);
     if (!file.is_open()) {
@@ -24,6 +46,14 @@ static std::optional<std::vector<uint8_t>> LoadFile(const std::string& path) {
 }
 
 int main(void) {
+#ifdef __linux__
+    auto usbmuxdGuard = std::make_unique<USBGuard>();
+    if (!usbmuxdGuard->DidSuccessfullyMask()) {
+        std::cerr << "[-] Could not stop usbmuxd. If the device is not detected, run:\nsudo systemctl mask --now usbmuxd\nbefore launching PXLInstaller.\nRun sudo systemctl unmask --now usbmuxd after finishing your session to allow normal usbmuxd operation.\n";
+        return;
+    }
+#endif
+
     Device device;
     bool deviceOpened = device.Open();
     if (!deviceOpened) {
