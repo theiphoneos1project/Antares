@@ -12,7 +12,7 @@ static constexpr auto RecoveryTimeout = std::chrono::seconds(15);
 struct USBGuard {
 public:
     USBGuard() {
-        long result = wxExecute("systemctl mask --now usbmuxd", wxEXEC_SYNC);
+        long result = system("systemctl mask --now usbmuxd");
         if (result == 0) {
             m_masked = true;
         }
@@ -20,7 +20,7 @@ public:
 
     ~USBGuard() {
         if (m_masked) {
-            wxExecute("systemctl unmask --now usbmuxd", wxEXEC_SYNC);
+            system("systemctl unmask --now usbmuxd");
         }
     }
 
@@ -50,7 +50,7 @@ int main(void) {
     auto usbmuxdGuard = std::make_unique<USBGuard>();
     if (!usbmuxdGuard->DidSuccessfullyMask()) {
         std::cerr << "[-] Could not stop usbmuxd. If the device is not detected, run:\nsudo systemctl mask --now usbmuxd\nbefore launching PXLInstaller.\nRun sudo systemctl unmask --now usbmuxd after finishing your session to allow normal usbmuxd operation.\n";
-        return;
+        return EXIT_FAILURE;
     }
 #endif
 
