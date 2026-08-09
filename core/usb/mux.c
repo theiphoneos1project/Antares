@@ -516,7 +516,7 @@ void forward_loop(int tcp_fd, mux_session_t *session) {
 #ifdef _WIN32
     HANDLE t1, t2;
     t1 = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)thread_tcp_to_usb, &ctx, 0, NULL);
-    t2 = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)thread_tcp_to_usb, &ctx, 0, NULL);
+    t2 = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)thread_usb_to_tcp, &ctx, 0, NULL);
 
     WaitForSingleObject(t1, INFINITE);
     WaitForSingleObject(t1, INFINITE);
