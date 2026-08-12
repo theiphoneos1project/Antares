@@ -30,7 +30,7 @@ private:
     static std::optional<std::vector<uint8_t>> LoadFile(const std::string& path);
 private:
     static constexpr uint32_t s_minimumWindowWidth = 362; 
-    static constexpr uint32_t s_minimumWindowHeight = 375;
+    static constexpr uint32_t s_minimumWindowHeight = 450;
 
     static constexpr auto RecoveryTimeout = std::chrono::seconds(15);
 

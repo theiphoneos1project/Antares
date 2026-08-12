@@ -60,7 +60,7 @@ MainFrame::MainFrame() :
     root->AddStretchSpacer(1);
 
     m_statusText = new wxStaticText(this, wxID_ANY, "No device connected.", wxDefaultPosition, wxDefaultSize);
-    root->Add(m_statusText, 0, wxLEFT, 15);
+    root->Add(m_statusText, 0, wxLEFT | wxTOP, 15);
 
     root->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL), 0, wxEXPAND | wxALL, 15);
 
@@ -79,7 +79,7 @@ MainFrame::MainFrame() :
     root->Add(MakeCustomHyperlink("The iPhone OS 1 Project GitHub", "https://github.com/theiphoneos1project"), 0, wxLEFT, 15);
     root->Add(MakeCustomHyperlink("Antares GitHub Repository", "https://github.com/theiphoneos1project/Antares"), 0, wxLEFT, 15);
     
-    root->AddStretchSpacer(2);
+    root->AddStretchSpacer(3);
     
     root->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL), 0, wxEXPAND | wxALL, 15);
     
