@@ -85,6 +85,11 @@ MainFrame::MainFrame() :
     
     auto *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
 
+    m_verboseBootCheckbox = new wxCheckBox(this, ID_VERBOSE_BOOT, "Verbose Boot");
+    buttonSizer->Add(m_verboseBootCheckbox, 0, wxCENTER);
+
+    buttonSizer->AddSpacer(15);
+
     m_jailbreakButton = new wxButton(this, ID_JAILBREAK, "Jailbreak");
     buttonSizer->Add(m_jailbreakButton, 1, wxEXPAND | wxCENTER);
 
@@ -212,6 +217,12 @@ void MainFrame::OnJailbreak(wxCommandEvent&) {
         wxMessageBox("Failed to send ramdisk!", "Error", wxICON_ERROR);
         m_device->SendCommand("bgcolor 125 0 0\n");
         return;
+    }
+
+    if (m_verboseBootCheckbox->IsChecked()) {
+        m_device->SendCommand("setenv antares_verbose_boot \"1\"\n");
+    } else {
+        m_device->SendCommand("setenv antares_verbose_boot \"0\"\n");
     }
 
     m_device->SendCommand("bgcolor 0 125 0\n");

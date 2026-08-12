@@ -37,6 +37,7 @@ private:
     std::string m_sessionID;
 
     wxStaticText *m_statusText = nullptr;
+    wxCheckBox *m_verboseBootCheckbox = nullptr;
     wxButton *m_jailbreakButton = nullptr;
 
     wxTimer m_connectionTimer;

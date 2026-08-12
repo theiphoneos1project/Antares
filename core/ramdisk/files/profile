@@ -13,7 +13,12 @@ export PATH="/bin:/sbin:/usr/bin:/usr/local/bin:/usr/sbin"
 /bin/echo "========================================"   
 /bin/echo
 
-/usr/bin/nvram boot-args="-v"
+if [ "$(/usr/bin/nvram antares_verbose_boot 2>/dev/null | /bin/cut -f 2)" == "1" ] ; then
+	/usr/bin/nvram boot-args="-v"
+else
+	/usr/bin/nvram boot-args=""
+fi
+
 /usr/bin/nvram auto-boot="true"
 
 /bin/sleep 5
@@ -95,6 +100,8 @@ fi
 /bin/echo
 
 /bin/sleep 10
+
+/usr/bin/nvram -d antares_verbose_boot >/dev/null
 
 /bin/echo "[+] Rebooting..."
 /bin/sleep 2
