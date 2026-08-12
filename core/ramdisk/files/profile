@@ -1,108 +1,108 @@
 export PATH="/bin:/sbin:/usr/bin:/usr/local/bin:/usr/sbin"
 
-/bin/sleep 5
+sleep 5
 
-/bin/echo -ne "\x1b[H\x1b[J"
+echo -ne "\x1b[H\x1b[J"
 
-/bin/echo "========================================"   
-/bin/echo
-/bin/echo "        _\|/_ Antares Jailbreak         "
-/bin/echo "        \"/|\\\" iPhone OS 1.0-1.1.5        "
-/bin/echo "   By NightwindDev and EthanArbuckle    "   
-/bin/echo
-/bin/echo "========================================"   
-/bin/echo
+echo "========================================"   
+echo
+echo "        _\|/_ Antares Jailbreak         "
+echo "        \"/|\\\" iPhone OS 1.0-1.1.5        "
+echo "   By NightwindDev and EthanArbuckle    "   
+echo
+echo "========================================"   
+echo
 
-if [ "$(/usr/bin/nvram antares_verbose_boot 2>/dev/null | /bin/cut -f 2)" == "1" ] ; then
-	/usr/bin/nvram boot-args="-v"
+if [ "$(nvram antares_verbose_boot 2>/dev/null | cut -f 2)" == "1" ] ; then
+	nvram boot-args="-v"
 else
-	/usr/bin/nvram boot-args=""
+	nvram boot-args=""
 fi
 
-/usr/bin/nvram auto-boot="true"
+nvram auto-boot="true"
 
-/bin/sleep 5
+sleep 5
 
-/bin/echo "[+] Checking disks..."
-/sbin/fsck_hfs -fy /dev/disk0s1 >/dev/null 2>&1
-/sbin/fsck_hfs -fy /dev/disk0s2 >/dev/null 2>&1
+echo "[+] Checking disks..."
+fsck_hfs -fy /dev/disk0s1 >/dev/null 2>&1
+fsck_hfs -fy /dev/disk0s2 >/dev/null 2>&1
 
-/bin/echo "[+] Mounting disks..."
-/sbin/mount_hfs -o noasync,sync /dev/disk0s1 /mnt1 >/dev/null 2>&1
-/sbin/mount_hfs -o noasync,sync /dev/disk0s2 /mnt2 >/dev/null 2>&1 
+echo "[+] Mounting disks..."
+mount_hfs -o noasync,sync /dev/disk0s1 /mnt1 >/dev/null 2>&1
+mount_hfs -o noasync,sync /dev/disk0s2 /mnt2 >/dev/null 2>&1 
 
 if [ ! -f "/mnt1/System/Library/CoreServices/SystemVersion.plist" ]; then
-	/bin/echo "[!] Filesystem is not ready, waiting a bit longer..."
-	/bin/sleep 5
+	echo "[!] Filesystem is not ready, waiting a bit longer..."
+	sleep 5
 
-	/bin/echo "[+] Checking disks..."
-	/sbin/fsck_hfs -fy /dev/disk0s1 >/dev/null 2>&1
-	/sbin/fsck_hfs -fy /dev/disk0s2 >/dev/null 2>&1
+	echo "[+] Checking disks..."
+	fsck_hfs -fy /dev/disk0s1 >/dev/null 2>&1
+	fsck_hfs -fy /dev/disk0s2 >/dev/null 2>&1
 
-	/bin/echo "[+] Mounting disks..."
-	/sbin/mount_hfs -o noasync,sync /dev/disk0s1 /mnt1 >/dev/null 2>&1
-	/sbin/mount_hfs -o noasync,sync /dev/disk0s2 /mnt2 >/dev/null 2>&1 
+	echo "[+] Mounting disks..."
+	mount_hfs -o noasync,sync /dev/disk0s1 /mnt1 >/dev/null 2>&1
+	mount_hfs -o noasync,sync /dev/disk0s2 /mnt2 >/dev/null 2>&1 
 
 	if [ ! -f "/mnt1/System/Library/CoreServices/SystemVersion.plist" ]; then
-        /bin/echo "[-] Fatal Error: Failed to mount /dev/disk0s1. Rebooting..."
-        /bin/sleep 5
-        /sbin/reboot
+        echo "[-] Fatal Error: Failed to mount /dev/disk0s1. Rebooting..."
+        sleep 5
+        reboot
         exit 1
     fi
 fi
 
-/bin/echo "[+] Starting jailbreak..."
+echo "[+] Starting jailbreak..."
 
-if ! /bin/grep -q "/dev/disk0s1 / hfs rw 0 1" /mnt1/etc/fstab; then
-	/bin/echo "[+] Copying fstab to root filesystem..."
-	/bin/cp /tmp/fstab /mnt1/etc/fstab
+if ! grep -q "/dev/disk0s1 / hfs rw 0 1" /mnt1/etc/fstab; then
+	echo "[+] Copying fstab to root filesystem..."
+	cp /tmp/fstab /mnt1/etc/fstab
 else
-	/bin/echo "[+] The root filesystem is already mounted as read write. Skipping..."
+	echo "[+] The root filesystem is already mounted as read write. Skipping..."
 fi
 
 if [ ! -f /mnt1/bin/chmod ]; then
-	/bin/echo "[+] Bootstrapping..."
+	echo "[+] Bootstrapping..."
 
-	/bin/cp /bin/chmod /mnt1/bin/chmod
-	/bin/cp /bin/sh /mnt1/bin/sh
-	/bin/cp /tmp/ls /mnt1/bin/ls
+	cp /bin/chmod /mnt1/bin/chmod
+	cp /bin/sh /mnt1/bin/sh
+	cp /tmp/ls /mnt1/bin/ls
 
-	/bin/cp /usr/lib/libarmfp.dylib /mnt1/usr/lib/libarmfp.dylib
-	/bin/cp /tmp/libintl.8.dylib /mnt1/usr/lib/libintl.8.dylib
+	cp /usr/lib/libarmfp.dylib /mnt1/usr/lib/libarmfp.dylib
+	cp /tmp/libintl.8.dylib /mnt1/usr/lib/libintl.8.dylib
 
-	/bin/chmod +x /mnt1/bin/ls
+	chmod +x /mnt1/bin/ls
 else
-	/bin/echo "[+] Device is already minimally bootstrapped. Skipping..."
+	echo "[+] Device is already minimally bootstrapped. Skipping..."
 fi
 
-if ! /bin/grep -q "com.apple.afc2" /mnt1/System/Library/Lockdown/Services.plist; then
-	/bin/echo "[+] Enabling Apple File Conduit \"2\"..."
-	/bin/cp /tmp/Services.plist /mnt1/System/Library/Lockdown/Services.plist
+if ! grep -q "com.apple.afc2" /mnt1/System/Library/Lockdown/Services.plist; then
+	echo "[+] Enabling Apple File Conduit \"2\"..."
+	cp /tmp/Services.plist /mnt1/System/Library/Lockdown/Services.plist
 else
-	/bin/echo "[+] Apple File Conduit \"2\" is already enabled. Skipping..."
+	echo "[+] Apple File Conduit \"2\" is already enabled. Skipping..."
 fi
 
-/bin/sleep 5
+sleep 5
 
-/bin/echo "[+] Unmounting filesystems..."
-/usr/bin/umount /mnt1 >/dev/null
-/usr/bin/umount /mnt2 >/dev/null
-/sbin/fsck_hfs /dev/disk0s1 >/dev/null
-/sbin/fsck_hfs /dev/disk0s2 >/dev/null
+echo "[+] Unmounting filesystems..."
+umount /mnt1 >/dev/null
+umount /mnt2 >/dev/null
+fsck_hfs /dev/disk0s1 >/dev/null
+fsck_hfs /dev/disk0s2 >/dev/null
 
-/bin/echo "[+] Done setting up."
+echo "[+] Done setting up."
 
-/bin/echo
-/bin/echo "======================================="
-/bin/echo "           !!! Attention !!!           "
-/bin/echo "If you want to fully bootstrap your device, make sure to install the PXLdaemon and install the BSD base package."
-/bin/echo "======================================="   
-/bin/echo
+echo
+echo "======================================="
+echo "           !!! Attention !!!           "
+echo "If you want to fully bootstrap your device, make sure to install the PXLdaemon and install the BSD base package."
+echo "======================================="   
+echo
 
-/bin/sleep 10
+sleep 10
 
-/usr/bin/nvram -d antares_verbose_boot >/dev/null
+nvram -d antares_verbose_boot >/dev/null
 
-/bin/echo "[+] Rebooting..."
-/bin/sleep 2
-/sbin/reboot
+echo "[+] Rebooting..."
+sleep 2
+reboot
