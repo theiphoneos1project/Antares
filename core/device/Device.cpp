@@ -70,6 +70,32 @@ Device::~Device() {
     }
 }
 
+bool Device::IsSupported(void) {
+    libusb_device **list;
+    ssize_t count = libusb_get_device_list(m_context, &list);
+    
+    bool found = false;
+    for (ssize_t i = 0; i < count; i++) {
+        libusb_device_descriptor descriptor;
+        if (libusb_get_device_descriptor(list[i], &descriptor) != 0) {
+            continue;
+        }
+
+        if (descriptor.idVendor != AppleVendorID) {
+            continue;
+        }
+
+        if (descriptor.idProduct == static_cast<uint16_t>(PID::NormaliPhone) ||
+            descriptor.idProduct == static_cast<uint16_t>(PID::NormaliPod) ||
+            descriptor.idProduct == static_cast<uint16_t>(PID::Recovery)) {
+            found = true;
+        }
+    }
+    
+    libusb_free_device_list(list, 1);
+    return found;
+}
+
 bool Device::InitHandshake(void) {
     iboot_message_t message;
     message.cmdcode = static_cast<int16_t>(Command::Initialize);

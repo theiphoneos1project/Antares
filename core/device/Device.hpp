@@ -53,6 +53,8 @@ public:
     bool Open(void);
     void Close(void);
 
+    bool IsSupported(void);
+
     std::optional<Mode> GetMode(void) const { return m_mode; }
 
     bool InitHandshake(void);
