@@ -60,7 +60,7 @@ MainFrame::MainFrame() :
     root->AddStretchSpacer(1);
 
     m_statusText = new wxStaticText(this, wxID_ANY, "No device connected.", wxDefaultPosition, wxDefaultSize);
-    root->Add(m_statusText, 0, wxLEFT | wxTOP, 15);
+    root->Add(m_statusText, 0, wxLEFT | wxRIGHT, 15);
 
     root->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL), 0, wxEXPAND | wxALL, 15);
 
@@ -351,7 +351,7 @@ void MainFrame::OnTimerPoll(wxTimerEvent&) {
 }
 
 void MainFrame::RefreshUI(void) {
-    m_statusText->Wrap(s_minimumWindowWidth - (15 * 2));
+    m_statusText->Wrap(s_minimumWindowWidth - (30 * 2));
 
     Refresh();
     Layout();
