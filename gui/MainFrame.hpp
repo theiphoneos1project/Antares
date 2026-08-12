@@ -36,6 +36,9 @@ private:
 
     std::string m_sessionID;
 
+    wxMenuItem *m_enterRecoveryItem = nullptr;
+    wxMenuItem *m_exitRecoveryItem = nullptr;
+
     wxStaticText *m_statusText = nullptr;
     wxCheckBox *m_verboseBootCheckbox = nullptr;
     wxButton *m_jailbreakButton = nullptr;

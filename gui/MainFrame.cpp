@@ -28,11 +28,11 @@ MainFrame::MainFrame() :
     auto *menuBar = new wxMenuBar();
     auto *toolsMenu = new wxMenu();
     
-    auto *enterRecoveryItem = new wxMenuItem(toolsMenu, ID_TOOL_ENTER_RECOVERY, "&Enter Recovery");
-    toolsMenu->Append(enterRecoveryItem);
+    m_enterRecoveryItem = new wxMenuItem(toolsMenu, ID_TOOL_ENTER_RECOVERY, "&Enter Recovery");
+    toolsMenu->Append(m_enterRecoveryItem);
     
-    auto *exitRecoveryItem = new wxMenuItem(toolsMenu, ID_TOOL_EXIT_RECOVERY, "&Exit Recovery");
-    toolsMenu->Append(exitRecoveryItem);
+    m_exitRecoveryItem = new wxMenuItem(toolsMenu, ID_TOOL_EXIT_RECOVERY, "&Exit Recovery");
+    toolsMenu->Append(m_exitRecoveryItem);
 
     menuBar->Append(toolsMenu, "&Tools");
     SetMenuBar(menuBar);
@@ -234,6 +234,8 @@ void MainFrame::OnJailbreak(wxCommandEvent&) {
 
 void MainFrame::OnTimerPoll(wxTimerEvent&) {
     if (m_lockdowndClient && m_lockdowndClient->IsOpen()) {
+        m_enterRecoveryItem->Enable(true);
+        m_exitRecoveryItem->Enable(false);
         return;
     }
     
@@ -251,6 +253,9 @@ void MainFrame::OnTimerPoll(wxTimerEvent&) {
     
     bool successfullyOpened = m_device->Open();
     if (!successfullyOpened) {
+        m_enterRecoveryItem->Enable(false);
+        m_exitRecoveryItem->Enable(false);
+
         m_statusText->SetLabel("No device connected.");
         m_jailbreakButton->Enable(false);
 
@@ -259,6 +264,9 @@ void MainFrame::OnTimerPoll(wxTimerEvent&) {
     }
 
     if (!m_device->IsSupported()) {
+        m_enterRecoveryItem->Enable(false);
+        m_exitRecoveryItem->Enable(false);
+
         m_statusText->SetLabel("Unsupported device.");
         m_jailbreakButton->Enable(false);
 
@@ -268,6 +276,9 @@ void MainFrame::OnTimerPoll(wxTimerEvent&) {
 
     auto mode = m_device->GetMode();
     if (!mode.has_value()) {
+        m_enterRecoveryItem->Enable(false);
+        m_exitRecoveryItem->Enable(false)
+        ;
         m_statusText->SetLabel("Failed to get device mode");
         m_jailbreakButton->Enable(false);
 
@@ -282,6 +293,9 @@ void MainFrame::OnTimerPoll(wxTimerEvent&) {
             m_lockdowndClient = std::make_unique<LockdownDaemonClient>();
 
             if (!m_lockdowndClient->Open()) {
+                m_enterRecoveryItem->Enable(false);
+                m_exitRecoveryItem->Enable(false);
+
                 m_lockdowndClient.reset();
 
                 m_statusText->SetLabel("Device connected in normal mode, but failed to open connection.");
@@ -294,6 +308,9 @@ void MainFrame::OnTimerPoll(wxTimerEvent&) {
             std::string sessionError;
             auto sessionID = m_lockdowndClient->StartPairedSession(sessionError);
             if (!sessionID.has_value()) {
+                m_enterRecoveryItem->Enable(false);
+                m_exitRecoveryItem->Enable(false);
+
                 m_lockdowndClient.reset();
 
                 m_statusText->SetLabel("Failed to start paired session: " + sessionError + ".");
@@ -302,6 +319,9 @@ void MainFrame::OnTimerPoll(wxTimerEvent&) {
 
                 return;
             }
+
+            m_enterRecoveryItem->Enable(true);
+            m_exitRecoveryItem->Enable(false);
 
             m_jailbreakButton->Enable(true);
             
@@ -319,6 +339,9 @@ void MainFrame::OnTimerPoll(wxTimerEvent&) {
         } break;
         
         case Device::Mode::Recovery: {
+            m_enterRecoveryItem->Enable(false);
+            m_exitRecoveryItem->Enable(true);
+
             m_statusText->SetLabel("Device connected in recovery mode!");
             m_jailbreakButton->Enable(true);
         } break;
