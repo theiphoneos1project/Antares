@@ -7,6 +7,12 @@
         {
             "name": "openssl",
             "version>=": "1.1.1n"
+        },
+        {
+            "name": "wxwidgets",
+            "default-features": false,
+            "features": ["debug-support"],
+            "platform": "!linux"
         }
     ],
     "overrides": [

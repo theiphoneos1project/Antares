@@ -84,6 +84,38 @@ add_executable(antares cli/main.cpp)
 target_compile_options(antares PRIVATE ${STRICT_FLAGS})
 target_link_libraries(antares PRIVATE antares-core)
 
+# GUI
+
+find_package(wxWidgets COMPONENTS core base QUIET)
+if(wxWidgets_FOUND)
+    include(${wxWidgets_USE_FILE})
+
+    add_executable(antares-gui WIN32
+        gui/main.cpp
+        gui/MainFrame.cpp
+    )
+    target_compile_options(antares-gui PRIVATE ${STRICT_FLAGS})
+    target_link_libraries(antares-gui PRIVATE
+        antares-core
+        ${wxWidgets_LIBRARIES}
+    )
+
+    if(APPLE)
+        target_link_options(antares-gui PRIVATE -Wl,-no_warn_duplicate_libraries)
+
+        set_target_properties(antares-gui PROPERTIES
+            OSX_ARCHITECTURES "${CMAKE_OSX_ARCHITECTURES}"
+            OSX_DEPLOYMENT_TARGET "${CMAKE_OSX_DEPLOYMENT_TARGET}"
+
+            MACOSX_BUNDLE TRUE
+            MACOSX_BUNDLE_GUI_IDENTIFIER "com.nightwind.antares"
+            MACOSX_BUNDLE_BUNDLE_NAME "Antares"
+        )
+    endif()
+else()
+    message(STATUS "wxWidgets not found, skipping GUI target")
+endif()
+
 # Platform-specific
 
 if(APPLE)
