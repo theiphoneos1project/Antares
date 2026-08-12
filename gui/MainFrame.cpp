@@ -103,41 +103,39 @@ MainFrame::MainFrame() :
     
     m_device = std::make_unique<Device>();
     if (!m_device) {
-        wxMessageBox("m_device is nullptr?");
+        wxMessageBox("m_device is nullptr?", "Error", wxICON_ERROR);
         return;
     }
 }
 
 void MainFrame::OnEnterRecovery(wxCommandEvent&) {
     if (!m_lockdowndClient || !m_lockdowndClient->IsOpen()) {
-        wxMessageBox("Cannot connect to lockdownd!");
+        wxMessageBox("Cannot connect to lockdownd!", "Error", wxICON_ERROR);
         return;
     }
-
-    std::cout << m_sessionID << std::endl;
     
     bool success = m_lockdowndClient->EnterRecoveryMode(m_sessionID);
     if (success) {
-        wxMessageBox("Sent device to recovery mode!");
+        wxMessageBox("Sent device to recovery mode!", "Success", wxICON_INFORMATION);
     } else {
-        wxMessageBox("Failed to send device to recovery mode!");
+        wxMessageBox("Failed to send device to recovery mode!", "Error", wxICON_ERROR);
     }
 }
 
 void MainFrame::OnExitRecovery(wxCommandEvent&) {
     if (!m_device) {
-        wxMessageBox("Cannot connect to device!");
+        wxMessageBox("Cannot connect to device!", "Error", wxICON_ERROR);
         return;
     }
     
     auto mode = m_device->GetMode();
     if (!mode.has_value()) {
-        wxMessageBox("Cannot determine device mode!");
+        wxMessageBox("Cannot determine device mode!", "Error", wxICON_ERROR);
         return;
     }
     
     if (*mode != Device::Mode::Recovery) {
-        wxMessageBox("Device is not in recovery mode!");
+        wxMessageBox("Device is not in recovery mode!", "Error", wxICON_ERROR);
         return;
     }
 
@@ -157,22 +155,22 @@ void MainFrame::OnExitRecovery(wxCommandEvent&) {
     m_device->SendCommand("saveenv\n");
     m_device->SendCommand("reboot\n");
 
-    wxMessageBox("Your device should now be exiting recovery.");
+    wxMessageBox("Your device should now be exiting recovery.", "Status", wxICON_INFORMATION);
 }
 
 void MainFrame::OnJailbreak(wxCommandEvent&) {
     if (m_lockdowndClient && m_lockdowndClient->IsOpen()) {
         bool success = m_lockdowndClient->EnterRecoveryMode(m_sessionID);
         if (!success) {
-            wxMessageBox("Failed to send recovery message to device!");
+            wxMessageBox("Failed to send recovery message to device!", "Error", wxICON_ERROR);
             return;
         }
 
         m_lockdowndClient->Close();
         
-        bool deviceOpened = false;
         const auto deadline = std::chrono::steady_clock::now() + RecoveryTimeout;
         
+        bool deviceOpened = false;
         do {
             deviceOpened = m_device->Open();
             if (deviceOpened) {
@@ -184,19 +182,19 @@ void MainFrame::OnJailbreak(wxCommandEvent&) {
         } while (std::chrono::steady_clock::now() < deadline); 
 
         if (!deviceOpened) {
-            wxMessageBox("Failed to send device to recovery mode. Please try again.");
+            wxMessageBox("Failed to send device to recovery mode. Please try again.", "Error", wxICON_ERROR);
             return;
         }
     }
 
     auto mode = m_device->GetMode();
     if (!mode.has_value()) {
-        wxMessageBox("Failed to get device mode.");
+        wxMessageBox("Failed to get device mode.", "Error", wxICON_ERROR);
         return;
     }
 
     if (*mode != Device::Mode::Recovery) {
-        wxMessageBox("Device is not in recovery mode.");
+        wxMessageBox("Device is not in recovery mode.", "Error", wxICON_ERROR);
         return;
     }
 
@@ -205,13 +203,13 @@ void MainFrame::OnJailbreak(wxCommandEvent&) {
     
     auto ramdiskData = LoadFile("core/ramdisk/ramdisk.img");
     if (!ramdiskData.has_value()) {
-        wxMessageBox("Failed to load ramdisk.img!!");
+        wxMessageBox("Failed to load ramdisk.img!", "Error", wxICON_ERROR);
         m_device->SendCommand("bgcolor 125 0 0\n");
         return;
     }
     
     if (!m_device->SendFile(*ramdiskData, 0x09CC2000)) {
-        wxMessageBox("Failed to send ramdisk!");
+        wxMessageBox("Failed to send ramdisk!", "Error", wxICON_ERROR);
         m_device->SendCommand("bgcolor 125 0 0\n");
         return;
     }
