@@ -10,7 +10,7 @@ RAMDISK_IMG_PATH = SCRIPT_DIR / "ramdisk.img"
 ZIBRI_DAT_PATH = SCRIPT_DIR / "zibri.dat"
 FILES_PATH = SCRIPT_DIR / "files"
 
-def get_hfsplus() -> str:
+def get_hfsplus() -> pathlib.Path:
     if platform.system() == "Windows":
         return SCRIPT_DIR / "xpwn" / "hfsplus.exe"
     else:
