@@ -18,7 +18,7 @@ public:
 private:
     void OnEnterRecovery(wxCommandEvent&);
     void OnExitRecovery(wxCommandEvent&);
-    void OnEnterDFU(wxCommandEvent&);
+    void OnCustomBootCommands(wxCommandEvent&);
     void OnJailbreak(wxCommandEvent&);
     void OnTimerPoll(wxTimerEvent&);
 
@@ -38,6 +38,7 @@ private:
 
     wxMenuItem *m_enterRecoveryItem = nullptr;
     wxMenuItem *m_exitRecoveryItem = nullptr;
+    wxMenuItem *m_customBootCommandsItem = nullptr;
 
     wxStaticText *m_statusText = nullptr;
     wxCheckBox *m_verboseBootCheckbox = nullptr;

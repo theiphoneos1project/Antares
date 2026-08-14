@@ -6,10 +6,12 @@
 #include <wx/stdpaths.h>
 #include <wx/filename.h>
 #include <wx/artprov.h>
+#include <wx/textdlg.h>
 
 enum {
     ID_TOOL_ENTER_RECOVERY = 1001,
     ID_TOOL_EXIT_RECOVERY,
+    ID_TOOL_CUSTOM_BOOT_COMMANDS,
     ID_JAILBREAK,
     ID_VERBOSE_BOOT,
     ID_CONNECTION_TIMER
@@ -33,6 +35,11 @@ MainFrame::MainFrame() :
     
     m_exitRecoveryItem = new wxMenuItem(toolsMenu, ID_TOOL_EXIT_RECOVERY, "&Exit Recovery");
     toolsMenu->Append(m_exitRecoveryItem);
+    
+    toolsMenu->AppendSeparator();
+
+    m_customBootCommandsItem = new wxMenuItem(toolsMenu, ID_TOOL_CUSTOM_BOOT_COMMANDS, "&Send custom boot commands");
+    toolsMenu->Append(m_customBootCommandsItem);
 
     menuBar->Append(toolsMenu, "&Tools");
     SetMenuBar(menuBar);
@@ -100,6 +107,7 @@ MainFrame::MainFrame() :
 
     Bind(wxEVT_MENU, &MainFrame::OnEnterRecovery, this, ID_TOOL_ENTER_RECOVERY);
     Bind(wxEVT_MENU, &MainFrame::OnExitRecovery, this, ID_TOOL_EXIT_RECOVERY);
+    Bind(wxEVT_MENU, &MainFrame::OnCustomBootCommands, this, ID_TOOL_CUSTOM_BOOT_COMMANDS);
     Bind(wxEVT_BUTTON, &MainFrame::OnJailbreak, this, ID_JAILBREAK);
     Bind(wxEVT_TIMER, &MainFrame::OnTimerPoll, this, ID_CONNECTION_TIMER);
 
@@ -149,8 +157,8 @@ void MainFrame::OnExitRecovery(wxCommandEvent&) {
     }
 
     int confirm = wxMessageBox(
-        "Verbose boot?",
         "Do you want to boot device with verbose logs?",
+        "Verbose boot?",
         wxYES_NO | wxICON_QUESTION
     );
 
@@ -165,6 +173,34 @@ void MainFrame::OnExitRecovery(wxCommandEvent&) {
     m_device->SendCommand("reboot\n");
 
     wxMessageBox("Your device should now be exiting recovery.", "Status", wxICON_INFORMATION);
+}
+
+void MainFrame::OnCustomBootCommands(wxCommandEvent&) {
+    int confirm = wxMessageBox(
+        "This is an option intended for people who want to input custom boot commands. Please make sure you know what you are doing! Are you sure you want to continue?",
+        "Warning",
+        wxYES_NO | wxICON_WARNING
+    );
+
+    if (confirm != wxYES) {
+        return;
+    }
+
+    while (true) {
+        wxTextEntryDialog dialog(this, "Enter a command to send to the device.\nPress cancel to stop.", "Send custom command");
+        
+        if (dialog.ShowModal() != wxID_OK) {
+            break;
+        }
+        
+        std::string command = dialog.GetValue().ToStdString();
+
+        m_device->SendCommand(command + "\n");
+        
+        if (command == "fsboot" || command == "reboot" || command == "reset" || command == "poweroff") {
+            break;
+        }
+    }
 }
 
 void MainFrame::OnJailbreak(wxCommandEvent&) {
@@ -192,9 +228,9 @@ void MainFrame::OnJailbreak(wxCommandEvent&) {
 
         if (!deviceOpened) {
 #if _WIN32
-        wxMessageBox("Failed to send device to recovery mode. Make sure the device's driver is set to libusbK in Zadig.", "Error", wxICON_ERROR);
+            wxMessageBox("Failed to send device to recovery mode. Make sure the device's driver is set to libusbK in Zadig.", "Error", wxICON_ERROR);
 #else
-        wxMessageBox("Failed to send device to recovery mode. Please try again.", "Error", wxICON_ERROR);
+            wxMessageBox("Failed to send device to recovery mode. Please try again.", "Error", wxICON_ERROR);
 #endif
             return;
         }
@@ -244,6 +280,7 @@ void MainFrame::OnTimerPoll(wxTimerEvent&) {
     if (m_lockdowndClient && m_lockdowndClient->IsOpen()) {
         m_enterRecoveryItem->Enable(true);
         m_exitRecoveryItem->Enable(false);
+        m_customBootCommandsItem->Enable(false);
         return;
     }
     
@@ -263,6 +300,7 @@ void MainFrame::OnTimerPoll(wxTimerEvent&) {
     if (!successfullyOpened) {
         m_enterRecoveryItem->Enable(false);
         m_exitRecoveryItem->Enable(false);
+        m_customBootCommandsItem->Enable(false);
 
         m_statusText->SetLabel("No device connected.");
         m_jailbreakButton->Enable(false);
@@ -274,6 +312,7 @@ void MainFrame::OnTimerPoll(wxTimerEvent&) {
     if (!m_device->IsSupported()) {
         m_enterRecoveryItem->Enable(false);
         m_exitRecoveryItem->Enable(false);
+        m_customBootCommandsItem->Enable(false);
 
         m_statusText->SetLabel("Unsupported device.");
         m_jailbreakButton->Enable(false);
@@ -285,8 +324,9 @@ void MainFrame::OnTimerPoll(wxTimerEvent&) {
     auto mode = m_device->GetMode();
     if (!mode.has_value()) {
         m_enterRecoveryItem->Enable(false);
-        m_exitRecoveryItem->Enable(false)
-        ;
+        m_exitRecoveryItem->Enable(false);
+        m_customBootCommandsItem->Enable(false);
+
         m_statusText->SetLabel("Failed to get device mode");
         m_jailbreakButton->Enable(false);
 
@@ -303,6 +343,7 @@ void MainFrame::OnTimerPoll(wxTimerEvent&) {
             if (!m_lockdowndClient->Open()) {
                 m_enterRecoveryItem->Enable(false);
                 m_exitRecoveryItem->Enable(false);
+                m_customBootCommandsItem->Enable(false);
 
                 m_lockdowndClient.reset();
 
@@ -318,6 +359,7 @@ void MainFrame::OnTimerPoll(wxTimerEvent&) {
             if (!sessionID.has_value()) {
                 m_enterRecoveryItem->Enable(false);
                 m_exitRecoveryItem->Enable(false);
+                m_customBootCommandsItem->Enable(false);
 
                 m_lockdowndClient.reset();
 
@@ -330,6 +372,7 @@ void MainFrame::OnTimerPoll(wxTimerEvent&) {
 
             m_enterRecoveryItem->Enable(true);
             m_exitRecoveryItem->Enable(false);
+            m_customBootCommandsItem->Enable(false);
 
             m_jailbreakButton->Enable(true);
             
@@ -349,6 +392,7 @@ void MainFrame::OnTimerPoll(wxTimerEvent&) {
         case Device::Mode::Recovery: {
             m_enterRecoveryItem->Enable(false);
             m_exitRecoveryItem->Enable(true);
+            m_customBootCommandsItem->Enable(true);
 
             m_statusText->SetLabel("Device connected in recovery mode!");
             m_jailbreakButton->Enable(true);
