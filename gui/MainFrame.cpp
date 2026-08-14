@@ -366,6 +366,10 @@ void MainFrame::OnTimerPoll(wxTimerEvent&) {
                 m_statusText->SetLabel("Failed to start paired session: " + sessionError + ".");
                 m_jailbreakButton->Enable(false);
                 RefreshUI();
+                
+                if (sessionError == "InvalidHostID") {
+                    wxMessageBox("Unplug and replug the device for repair.", "InvalidHostID", wxICON_ERROR);
+                }
 
                 return;
             }
