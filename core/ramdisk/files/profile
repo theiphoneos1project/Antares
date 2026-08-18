@@ -59,15 +59,6 @@ if [ "$(nvram antares_hacktivate 2>/dev/null | cut -f 2)" == "1" ] ; then
 	sh /tmp/hacktivate.sh
 fi
 
-echo "[+] Done setting up."
-
-echo
-echo "======================================="
-echo "           !!! Attention !!!           "
-echo "If you want to fully bootstrap your device, make sure to install the PXLdaemon and install the BSD base package."
-echo "======================================="   
-echo
-
 sleep 10
 
 nvram -d antares_verbose_boot >/dev/null

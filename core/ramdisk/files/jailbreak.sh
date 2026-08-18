@@ -38,3 +38,12 @@ umount /mnt1 >/dev/null
 umount /mnt2 >/dev/null
 fsck_hfs /dev/disk0s1 >/dev/null
 fsck_hfs /dev/disk0s2 >/dev/null
+
+echo "[+] Done setting up."
+
+echo
+echo "======================================="
+echo "           !!! Attention !!!           "
+echo "If you want to fully bootstrap your device, make sure to install the PXLdaemon and install the BSD base package."
+echo "======================================="   
+echo
