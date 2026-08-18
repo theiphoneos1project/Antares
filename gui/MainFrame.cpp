@@ -8,8 +8,11 @@
 #include <wx/artprov.h>
 #include <wx/textdlg.h>
 
+#include <plist/plist++.h>
+
 enum {
-    ID_TOOL_ENTER_RECOVERY = 1001,
+    ID_TOOL_HACKTIVATE = 1001,
+    ID_TOOL_ENTER_RECOVERY,
     ID_TOOL_EXIT_RECOVERY,
     ID_TOOL_CUSTOM_BOOT_COMMANDS,
     ID_JAILBREAK,
@@ -30,6 +33,11 @@ MainFrame::MainFrame() :
     auto *menuBar = new wxMenuBar();
     auto *toolsMenu = new wxMenu();
     
+    m_hacktivateItem = new wxMenuItem(toolsMenu, ID_TOOL_HACKTIVATE, "&Hacktivate");
+    toolsMenu->Append(m_hacktivateItem);
+    
+    toolsMenu->AppendSeparator();
+
     m_enterRecoveryItem = new wxMenuItem(toolsMenu, ID_TOOL_ENTER_RECOVERY, "&Enter Recovery");
     toolsMenu->Append(m_enterRecoveryItem);
     
@@ -105,6 +113,7 @@ MainFrame::MainFrame() :
     m_connectionTimer.SetOwner(this, ID_CONNECTION_TIMER);
     m_connectionTimer.Start(1000);
 
+    Bind(wxEVT_MENU, &MainFrame::OnHacktivate, this, ID_TOOL_HACKTIVATE);
     Bind(wxEVT_MENU, &MainFrame::OnEnterRecovery, this, ID_TOOL_ENTER_RECOVERY);
     Bind(wxEVT_MENU, &MainFrame::OnExitRecovery, this, ID_TOOL_EXIT_RECOVERY);
     Bind(wxEVT_MENU, &MainFrame::OnCustomBootCommands, this, ID_TOOL_CUSTOM_BOOT_COMMANDS);
@@ -119,6 +128,36 @@ MainFrame::MainFrame() :
         wxMessageBox("m_device is nullptr?", "Error", wxICON_ERROR);
         return;
     }
+}
+
+void MainFrame::OnHacktivate(wxCommandEvent&) {
+    if (!EnsureDeviceInRecoveryMode()) {
+        return false;
+    }
+
+    m_device->SendCommand("setpicture 0\n");
+    m_device->SendCommand("bgcolor 125 125 0\n");
+    
+    auto ramdiskData = LoadFile("core/ramdisk/ramdisk.img");
+    if (!ramdiskData.has_value()) {
+        wxMessageBox("Failed to load ramdisk.img!", "Error", wxICON_ERROR);
+        m_device->SendCommand("bgcolor 125 0 0\n");
+        return;
+    }
+    
+    if (!m_device->SendFile(*ramdiskData, 0x09CC2000)) {
+        wxMessageBox("Failed to send ramdisk!", "Error", wxICON_ERROR);
+        m_device->SendCommand("bgcolor 125 0 0\n");
+        return;
+    }
+
+    m_device->SendCommand("setenv antares_hacktivate \"1\"\n");
+
+    m_device->SendCommand("bgcolor 0 125 0\n");
+
+    m_device->SendCommand("setenv boot-args \"rd=md0 -s -x pmd0=0x09CC2000.0x0133D000\"\n");
+    m_device->SendCommand("saveenv\n");
+    m_device->SendCommand("fsboot\n");
 }
 
 void MainFrame::OnEnterRecovery(wxCommandEvent&) {
@@ -204,47 +243,8 @@ void MainFrame::OnCustomBootCommands(wxCommandEvent&) {
 }
 
 void MainFrame::OnJailbreak(wxCommandEvent&) {
-    if (m_lockdowndClient && m_lockdowndClient->IsOpen()) {
-        bool success = m_lockdowndClient->EnterRecoveryMode(m_sessionID);
-        if (!success) {
-            wxMessageBox("Failed to send recovery message to device!", "Error", wxICON_ERROR);
-            return;
-        }
-
-        m_lockdowndClient->Close();
-        
-        const auto deadline = std::chrono::steady_clock::now() + RecoveryTimeout;
-        
-        bool deviceOpened = false;
-        do {
-            deviceOpened = m_device->Open();
-            if (deviceOpened) {
-                auto currentMode = m_device->GetMode();
-                if (currentMode.has_value() && *currentMode == Device::Mode::Recovery) {
-                    break;
-                }
-            }
-        } while (std::chrono::steady_clock::now() < deadline); 
-
-        if (!deviceOpened) {
-#if _WIN32
-            wxMessageBox("Failed to send device to recovery mode. Make sure the device's driver is set to libusbK in Zadig.", "Error", wxICON_ERROR);
-#else
-            wxMessageBox("Failed to send device to recovery mode. Please try again.", "Error", wxICON_ERROR);
-#endif
-            return;
-        }
-    }
-
-    auto mode = m_device->GetMode();
-    if (!mode.has_value()) {
-        wxMessageBox("Failed to get device mode.", "Error", wxICON_ERROR);
-        return;
-    }
-
-    if (*mode != Device::Mode::Recovery) {
-        wxMessageBox("Device is not in recovery mode.", "Error", wxICON_ERROR);
-        return;
+    if (!EnsureDeviceInRecoveryMode()) {
+        return false;
     }
 
     m_device->SendCommand("setpicture 0\n");
@@ -268,6 +268,8 @@ void MainFrame::OnJailbreak(wxCommandEvent&) {
     } else {
         m_device->SendCommand("setenv antares_verbose_boot \"0\"\n");
     }
+
+    m_device->SendCommand("setenv antares_jailbreak \"1\"\n");
 
     m_device->SendCommand("bgcolor 0 125 0\n");
 
@@ -411,6 +413,53 @@ void MainFrame::RefreshUI(void) {
 
     Refresh();
     Layout();
+}
+
+bool MainFrame::EnsureDeviceInRecoveryMode(void) {
+    if (m_lockdowndClient && m_lockdowndClient->IsOpen()) {
+        bool success = m_lockdowndClient->EnterRecoveryMode(m_sessionID);
+        if (!success) {
+            wxMessageBox("Failed to send recovery message to device!", "Error", wxICON_ERROR);
+            return false;
+        }
+
+        m_lockdowndClient->Close();
+        
+        const auto deadline = std::chrono::steady_clock::now() + RecoveryTimeout;
+        
+        bool deviceOpened = false;
+        do {
+            deviceOpened = m_device->Open();
+            if (deviceOpened) {
+                auto currentMode = m_device->GetMode();
+                if (currentMode.has_value() && *currentMode == Device::Mode::Recovery) {
+                    break;
+                }
+            }
+        } while (std::chrono::steady_clock::now() < deadline); 
+
+        if (!deviceOpened) {
+#if _WIN32
+            wxMessageBox("Failed to send device to recovery mode. Make sure the device's driver is set to libusbK in Zadig.", "Error", wxICON_ERROR);
+#else
+            wxMessageBox("Failed to send device to recovery mode. Please try again.", "Error", wxICON_ERROR);
+#endif
+            return false;
+        }
+    }
+
+    auto mode = m_device->GetMode();
+    if (!mode.has_value()) {
+        wxMessageBox("Failed to get device mode.", "Error", wxICON_ERROR);
+        return false;
+    }
+
+    if (*mode != Device::Mode::Recovery) {
+        wxMessageBox("Device is not in recovery mode.", "Error", wxICON_ERROR);
+        return false;
+    }
+
+    return true;
 }
 
 wxHyperlinkCtrl *MainFrame::MakeCustomHyperlink(const wxString& name, const wxString& link) {

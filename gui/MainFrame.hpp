@@ -16,6 +16,7 @@ class MainFrame : public wxFrame {
 public:
     MainFrame();
 private:
+    void OnHacktivate(wxCommandEvent&);
     void OnEnterRecovery(wxCommandEvent&);
     void OnExitRecovery(wxCommandEvent&);
     void OnCustomBootCommands(wxCommandEvent&);
@@ -23,6 +24,8 @@ private:
     void OnTimerPoll(wxTimerEvent&);
 
     void RefreshUI(void);
+
+    bool EnsureDeviceInRecoveryMode(void);
 
     wxHyperlinkCtrl *MakeCustomHyperlink(const wxString& name, const wxString& link);
     
@@ -36,6 +39,7 @@ private:
 
     std::string m_sessionID;
 
+    wxMenuItem *m_hacktivateItem = nullptr;
     wxMenuItem *m_enterRecoveryItem = nullptr;
     wxMenuItem *m_exitRecoveryItem = nullptr;
     wxMenuItem *m_customBootCommandsItem = nullptr;
