@@ -131,8 +131,18 @@ MainFrame::MainFrame() :
 }
 
 void MainFrame::OnHacktivate(wxCommandEvent&) {
+    int confirm = wxMessageBox(
+        "Are you sure you want to hacktivate your device? There may be unintended consequences. This feature supports both the original iPhone and iPod touch.",
+        "Hacktivate?",
+        wxYES_NO | wxICON_QUESTION
+    );
+
+    if (confirm != wxYES) {
+        return;
+    } 
+
     if (!EnsureDeviceInRecoveryMode()) {
-        return false;
+        return;
     }
 
     m_device->SendCommand("setpicture 0\n");
@@ -244,7 +254,7 @@ void MainFrame::OnCustomBootCommands(wxCommandEvent&) {
 
 void MainFrame::OnJailbreak(wxCommandEvent&) {
     if (!EnsureDeviceInRecoveryMode()) {
-        return false;
+        return;
     }
 
     m_device->SendCommand("setpicture 0\n");
