@@ -1,6 +1,7 @@
 #include "MainFrame.hpp"
 
 #include <fstream>
+#include <thread>
 
 #include <wx/statline.h>
 #include <wx/stdpaths.h>
@@ -439,6 +440,8 @@ bool MainFrame::EnsureDeviceInRecoveryMode(void) {
         
         bool deviceOpened = false;
         do {
+            std::this_thread::sleep_for(std::chrono::milliseconds(250));
+
             deviceOpened = m_device->Open();
             if (deviceOpened) {
                 auto currentMode = m_device->GetMode();

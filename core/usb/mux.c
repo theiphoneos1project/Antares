@@ -519,7 +519,7 @@ void forward_loop(int tcp_fd, mux_session_t *session) {
     t2 = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)thread_usb_to_tcp, &ctx, 0, NULL);
 
     WaitForSingleObject(t1, INFINITE);
-    WaitForSingleObject(t1, INFINITE);
+    WaitForSingleObject(t2, INFINITE);
 
     CloseHandle(t1);
     CloseHandle(t2);

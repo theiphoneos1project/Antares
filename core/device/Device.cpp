@@ -71,8 +71,11 @@ Device::~Device() {
 }
 
 bool Device::IsSupported(void) {
-    libusb_device **list;
+    libusb_device **list = nullptr;
     ssize_t count = libusb_get_device_list(m_context, &list);
+    if (count < 0 || !list) {
+        return false;
+    }
     
     bool found = false;
     for (ssize_t i = 0; i < count; i++) {
