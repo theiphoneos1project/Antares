@@ -179,7 +179,7 @@ void MainFrame::OnEnterRecovery(wxCommandEvent&) {
     
     bool success = m_lockdowndClient->EnterRecoveryMode(m_sessionID);
     if (success) {
-#if _WIN32
+#ifdef _WIN32
         wxMessageBox("Sent device to recovery mode! If Antares does not see your device once it is in recovery mode, make sure that its driver is set to libusbK in Zadig.", "Success", wxICON_INFORMATION);
 #else
         wxMessageBox("Sent device to recovery mode!", "Success", wxICON_INFORMATION);
@@ -452,7 +452,7 @@ bool MainFrame::EnsureDeviceInRecoveryMode(void) {
         } while (std::chrono::steady_clock::now() < deadline); 
 
         if (!deviceOpened) {
-#if _WIN32
+#ifdef _WIN32
             wxMessageBox("Failed to send device to recovery mode. Make sure the device's driver is set to libusbK in Zadig.", "Error", wxICON_ERROR);
 #else
             wxMessageBox("Failed to send device to recovery mode. Please try again.", "Error", wxICON_ERROR);

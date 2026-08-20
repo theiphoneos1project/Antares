@@ -27,7 +27,7 @@ private:
 class App : public wxApp {
 public:
     bool OnInit() override {
-#if _WIN32
+#ifdef _WIN32
         wxTheApp->SetAppearance(wxApp::Appearance::Dark);
 #endif
         wxString name = wxString::Format("Antares-%s", wxGetUserId());
@@ -48,7 +48,7 @@ public:
         }
 #endif
 
-#if _WIN32
+#ifdef _WIN32
         wxMessageBox("On Windows, you may have to use a tool such as Zadig to rebind your driver for your connected device to libusbK. You will have to do this for both normal mode and recovery mode. If you connect a different device, you will have to run the steps again.", "Information", wxICON_INFORMATION);
 #endif
 
