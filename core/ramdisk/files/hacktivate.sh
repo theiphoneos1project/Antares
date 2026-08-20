@@ -31,29 +31,37 @@ if grep -q "<string>3A110a</string>" "${SYSTEM_VERSION}"; then
     patch_bspatch "/mnt2/1.1.1activation.bspatch" "0ef900923d425e1917699ab54a5b60b4"
 fi
 
-# Disable brick state
 DATA_ARK_PLIST="/mnt2/root/Library/Lockdown/data_ark.plist"
 
 if [ -f "${DATA_ARK_PLIST}" ]; then
-    
     BUFFER="$(cat "${DATA_ARK_PLIST}")"
 
-    PRE="${BUFFER%%"<key>-BrickState</key>"*}"
-    POST="${BUFFER#*"<key>-BrickState</key>"}"
-    
-    case "${POST%%"<key>"*}" in
-        *"<true/>"*)
-            echo "[+] Disabling BrickState..."
-
-            BUFFER="${PRE}<key>-BrickState</key>${POST/<true\/>/<false/>}"
-
-            echo "${BUFFER}" > "${DATA_ARK_PLIST}"
-
-            chmod 600 "${DATA_ARK_PLIST}"
-            chown root:wheel "${DATA_ARK_PLIST}"
-            ;;
+    # Disable brick state
+    BRICKSTATE_KEY="<key>-BrickState</key>"
+    case "${BUFFER}" in
+        *"${BRICKSTATE_KEY}"*)
+            PRE="${BUFFER%%"${BRICKSTATE_KEY}"*}"
+            POST="${BUFFER#*"${BRICKSTATE_KEY}"}"
+            
+            case "${POST%%"<key>"*}" in
+                *"<true/>"*)
+                    echo "[+] Disabling BrickState..."
+                    POST_PRE="${POST%%"<true/>"*}"
+                    POST_REST="${POST#*"<true/>"}"
+                    BUFFER="${PRE}${BRICKSTATE_KEY}${POST_PRE}<false/>${POST_REST}"
+                    ;;
+                *)
+                    echo "[+] BrickState is already disabled. Skipping..."
+                    ;;
+            esac
+        ;;
         *)
-            echo "[+] BrickState is already disabled. Skipping..."
+            echo "[+] BrickState key not present in plist. Skipping..."
             ;;
     esac
+
+    echo "${BUFFER}" > "${DATA_ARK_PLIST}"
+
+    chmod 600 "${DATA_ARK_PLIST}"
+    chown root:wheel "${DATA_ARK_PLIST}"
 fi
