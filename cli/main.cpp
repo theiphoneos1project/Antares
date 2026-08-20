@@ -118,13 +118,19 @@ static void PrintUsage(void) {
               << "By Nightwind and EthanArbuckle  \n\n"
               << "Usage:\n"
               << "  ./antares --jailbreak\n"
-              << "  ./antares --hacktivate\n";
+              << "  ./antares --hacktivate\n"
+              << "Add --verbose as your last argument for verbose boot.\n\n";
 }
 
-int main(int argc, __unused char *argv[]) {
+int main(int argc, char *argv[]) {
     if (argc < 2) {
         PrintUsage();
         return 1;
+    }
+
+    bool isVerboseBootEnabled = false;
+    if (std::string(argv[argc - 1]) == "--verbose") {
+        isVerboseBootEnabled = true;
     }
 
 #ifdef __linux__
@@ -141,14 +147,14 @@ int main(int argc, __unused char *argv[]) {
         std::cerr << "[-] Failed to open device\n";
         return EXIT_FAILURE;
     }
-
-    bool inRecovery = EnsureDeviceInRecoveryMode(device);
-    if (!inRecovery) {
-        return EXIT_FAILURE;
-    }
-
+    
     std::string_view command = argv[1];
     if (command == "--jailbreak") {
+        bool inRecovery = EnsureDeviceInRecoveryMode(device);
+        if (!inRecovery) {
+            return EXIT_FAILURE;
+        }
+
         device.SendCommand("setpicture 0\n");
         device.SendCommand("bgcolor 125 125 0\n");
 
@@ -168,12 +174,23 @@ int main(int argc, __unused char *argv[]) {
 
         device.SendCommand("setenv antares_jailbreak \"1\"\n");
 
+        if (isVerboseBootEnabled) {
+            device.SendCommand("setenv antares_verbose_boot \"1\"\n");
+        } else {
+            device.SendCommand("setenv antares_verbose_boot \"0\"\n");
+        }
+
         device.SendCommand("bgcolor 0 125 0\n");
 
         device.SendCommand("setenv boot-args \"rd=md0 -s -x pmd0=0x09CC2000.0x0133D000\"\n");
         device.SendCommand("saveenv\n");
         device.SendCommand("fsboot\n");
     } else if (command == "--hacktivate") {
+        bool inRecovery = EnsureDeviceInRecoveryMode(device);
+        if (!inRecovery) {
+            return EXIT_FAILURE;
+        }
+
         device.SendCommand("setpicture 0\n");
         device.SendCommand("bgcolor 125 125 0\n");
         
@@ -192,10 +209,20 @@ int main(int argc, __unused char *argv[]) {
 
         device.SendCommand("setenv antares_hacktivate \"1\"\n");
 
+        if (isVerboseBootEnabled) {
+            device.SendCommand("setenv antares_verbose_boot \"1\"\n");
+        } else {
+            device.SendCommand("setenv antares_verbose_boot \"0\"\n");
+        }
+
         device.SendCommand("bgcolor 0 125 0\n");
 
         device.SendCommand("setenv boot-args \"rd=md0 -s -x pmd0=0x09CC2000.0x0133D000\"\n");
         device.SendCommand("saveenv\n");
         device.SendCommand("fsboot\n");
+    } else {
+        std::cerr << "[-] Unknown command: " << command << "\n";
+        PrintUsage();
+        return EXIT_FAILURE;
     }
 }
