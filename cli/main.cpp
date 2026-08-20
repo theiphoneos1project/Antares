@@ -45,27 +45,14 @@ static std::optional<std::vector<uint8_t>> LoadFile(const std::string& path) {
     return result;
 }
 
-int main(void) {
-#ifdef __linux__
-    auto usbmuxdGuard = std::make_unique<USBGuard>();
-    if (!usbmuxdGuard->DidSuccessfullyMask()) {
-        std::cerr << "[-] Could not stop usbmuxd. If the device is not detected, run:\nsudo systemctl mask --now usbmuxd\nbefore launching PXLInstaller.\nRun sudo systemctl unmask --now usbmuxd after finishing your session to allow normal usbmuxd operation.\n";
-        return EXIT_FAILURE;
-    }
-#endif
-
-    Device device;
-    bool deviceOpened = device.Open();
-    if (!deviceOpened) {
-        std::cerr << "[-] Failed to open device\n";
-        return EXIT_FAILURE;
-    }
-
+static bool EnsureDeviceInRecoveryMode(Device& device) {
     auto mode = device.GetMode();
     if (!mode.has_value()) {
         std::cerr << "[-] Can't find device mode\n";
-        return EXIT_FAILURE;
+        return false;
     }
+
+    bool deviceOpened = device.Open();
     
     if (*mode == Device::Mode::Normal) {
         std::cout << "[+] Sending device to recovery mode...\n";
@@ -76,14 +63,14 @@ int main(void) {
         bool lockdowndOpened = lockdowndClient.Open();
         if (!lockdowndOpened) {
             std::cerr << "[-] Failed to open USB connection to device...\n";
-            return EXIT_FAILURE;
+            return false;
         }
     
         std::string sessionError;
         auto sessionID = lockdowndClient.StartPairedSession(sessionError);
         if (!sessionID.has_value()) {
             std::cerr << "[-] Failed to start paired session: " << sessionError << "\n";
-            return EXIT_FAILURE;
+            return false;
         }
 
         bool enterRecoverySuccess = lockdowndClient.EnterRecoveryMode(*sessionID);
@@ -106,43 +93,109 @@ int main(void) {
 
         if (!deviceOpened) {
             std::cerr << "[-] Failed to open device in recovery mode\n";
-            return EXIT_FAILURE;
+            return false;
         }
 
         mode = device.GetMode();
         if (!mode.has_value()) {
             std::cerr << "[-] Can't find device mode\n";
-            return EXIT_FAILURE;
+            return false;
         }
     }
 
     if (*mode != Device::Mode::Recovery) {
         std::cerr << "[-] Device is not in recovery mode! :(\n";
-        return EXIT_FAILURE;
-    }
-
-    std::cout << "Here we go!\n";
-
-    device.SendCommand("setpicture 0\n");
-    device.SendCommand("bgcolor 125 125 0\n");
-    
-    auto ramdiskData = LoadFile("core/ramdisk/ramdisk.img");
-    if (!ramdiskData.has_value()) {
-        std::cerr << "[-] Failed to load zibri.dat\n";
-        device.SendCommand("bgcolor 125 0 0\n");
-        return EXIT_FAILURE;
+        return false;
     }
     
-    std::cout << "[+] Sending ramdisk...\n";
-    if (!device.SendFile(*ramdiskData, 0x09CC2000)) {
-        std::cerr << "[-] Failed to send ramdisk!\n";
-        device.SendCommand("bgcolor 125 0 0\n");
+    return true;
+}
+
+static void PrintUsage(void) {
+    std::cout << "\n"
+              << "_\\|/_ Antares Jailbreak CLI  \n"
+              << "\"/|\\\" iPhone OS 1.0-1.1.5  \n"
+              << "By Nightwind and EthanArbuckle  \n\n"
+              << "Usage:\n"
+              << "  ./antares --jailbreak\n"
+              << "  ./antares --hacktivate\n";
+}
+
+int main(int argc, __unused char *argv[]) {
+    if (argc < 2) {
+        PrintUsage();
+        return 1;
+    }
+
+#ifdef __linux__
+    auto usbmuxdGuard = std::make_unique<USBGuard>();
+    if (!usbmuxdGuard->DidSuccessfullyMask()) {
+        std::cerr << "[-] Could not stop usbmuxd. If the device is not detected, run:\nsudo systemctl mask --now usbmuxd\nbefore launching Antares.\nRun sudo systemctl unmask --now usbmuxd after finishing your session to allow normal usbmuxd operation.\n";
+        return EXIT_FAILURE;
+    }
+#endif
+
+    Device device;
+    bool deviceOpened = device.Open();
+    if (!deviceOpened) {
+        std::cerr << "[-] Failed to open device\n";
         return EXIT_FAILURE;
     }
 
-    device.SendCommand("bgcolor 0 125 0\n");
+    bool inRecovery = EnsureDeviceInRecoveryMode(device);
+    if (!inRecovery) {
+        return EXIT_FAILURE;
+    }
 
-    device.SendCommand("setenv boot-args \"rd=md0 -s -x pmd0=0x09CC2000.0x0133D000\"\n");
-    device.SendCommand("saveenv\n");
-    device.SendCommand("fsboot\n");
+    std::string_view command = argv[1];
+    if (command == "--jailbreak") {
+        device.SendCommand("setpicture 0\n");
+        device.SendCommand("bgcolor 125 125 0\n");
+
+        auto ramdiskData = LoadFile("core/ramdisk/ramdisk.img");
+        if (!ramdiskData.has_value()) {
+            std::cerr << "[-] Failed to load ramdisk.img\n";
+            device.SendCommand("bgcolor 125 0 0\n");
+            return EXIT_FAILURE;
+        }
+
+        std::cout << "[+] Sending ramdisk...\n";
+        if (!device.SendFile(*ramdiskData, 0x09CC2000)) {
+            std::cerr << "[-] Failed to send ramdisk!\n";
+            device.SendCommand("bgcolor 125 0 0\n");
+            return EXIT_FAILURE;
+        }
+
+        device.SendCommand("setenv antares_jailbreak \"1\"\n");
+
+        device.SendCommand("bgcolor 0 125 0\n");
+
+        device.SendCommand("setenv boot-args \"rd=md0 -s -x pmd0=0x09CC2000.0x0133D000\"\n");
+        device.SendCommand("saveenv\n");
+        device.SendCommand("fsboot\n");
+    } else if (command == "--hacktivate") {
+        device.SendCommand("setpicture 0\n");
+        device.SendCommand("bgcolor 125 125 0\n");
+        
+        auto ramdiskData = LoadFile("core/ramdisk/ramdisk.img");
+        if (!ramdiskData.has_value()) {
+            std::cerr << "[-] Failed to load ramdisk.img\n";
+            device.SendCommand("bgcolor 125 0 0\n");
+            return EXIT_FAILURE;
+        }
+        
+        if (!device.SendFile(*ramdiskData, 0x09CC2000)) {
+            std::cerr << "[-] Failed to send ramdisk!\n";
+            device.SendCommand("bgcolor 125 0 0\n");
+            return EXIT_FAILURE;
+        }
+
+        device.SendCommand("setenv antares_hacktivate \"1\"\n");
+
+        device.SendCommand("bgcolor 0 125 0\n");
+
+        device.SendCommand("setenv boot-args \"rd=md0 -s -x pmd0=0x09CC2000.0x0133D000\"\n");
+        device.SendCommand("saveenv\n");
+        device.SendCommand("fsboot\n");
+    }
 }
