@@ -627,7 +627,6 @@ int find_and_claim(libusb_context *ctx, libusb_device_handle **out_handle, uint8
         
         int cr = libusb_claim_interface(handle, mux_intf);
         if (cr < 0) {
-            fprintf(stderr, "claim_interface %d failed: %s\n", mux_intf, libusb_strerror(cr));
             libusb_close(handle);
             continue;
         }
