@@ -41,7 +41,7 @@ public:
         m_usbmuxdGuard = std::make_unique<USBGuard>();
         if (!m_usbmuxdGuard->DidSuccessfullyMask()) {
             wxMessageBox(
-                "Could not stop usbmuxd. If the device is not detected, run:\nsudo systemctl mask --now usbmuxd\nbefore launching PXLInstaller.\nRun sudo systemctl unmask --now usbmuxd after finishing your session to allow normal usbmuxd operation.",
+                "Could not stop usbmuxd. If the device is not detected, run:\nsudo systemctl mask --now usbmuxd\nbefore launching Antares.\nRun sudo systemctl unmask --now usbmuxd after finishing your session to allow normal usbmuxd operation.",
                 "Warning",
                 wxICON_WARNING
             );
