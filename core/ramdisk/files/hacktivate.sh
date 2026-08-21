@@ -24,11 +24,11 @@ if grep -qE "<string>(1A543a|1C25|1C28|3A109a|3B48b|4A93|4A102|4B1)</string>" "$
 fi
 
 if grep -qE "<string>(3A100a|3A101a)</string>" "${SYSTEM_VERSION}"; then
-    patch_bspatch "/mnt2/1.1activation.bspatch" "2877d3d910820b67daf67dba3d6296ec"
+    patch_bspatch "/tmp/hacktivate_1.1.bspatch" "2877d3d910820b67daf67dba3d6296ec"
 fi
 
 if grep -q "<string>3A110a</string>" "${SYSTEM_VERSION}"; then
-    patch_bspatch "/mnt2/1.1.1activation.bspatch" "0ef900923d425e1917699ab54a5b60b4"
+    patch_bspatch "/tmp/hacktivate_1.1.1.bspatch" "0ef900923d425e1917699ab54a5b60b4"
 fi
 
 DATA_ARK_PLIST="/mnt2/root/Library/Lockdown/data_ark.plist"
