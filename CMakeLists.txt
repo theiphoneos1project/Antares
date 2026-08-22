@@ -152,3 +152,28 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release" AND NOT WIN32)
         COMMAND strip -x $<TARGET_FILE:antares>
     )
 endif()
+
+# Distribution
+
+set(DIST_DIR ${CMAKE_HOME_DIRECTORY}/dist)
+
+if(APPLE AND wxWidgets_FOUND)
+    set(DIST_DEPENDS antares antares-gui)
+    set(DIST_GUI_CMD COMMAND ${CMAKE_COMMAND} -E copy_directory $<TARGET_BUNDLE_DIR:antares-gui> ${DIST_DIR}/antares-gui.app)
+elseif(wxWidgets_FOUND)
+    set(DIST_DEPENDS antares antares-gui)
+    set(DIST_GUI_CMD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:antares-gui> ${DIST_DIR}/antares-gui)
+else()
+    set(DIST_DEPENDS antares)
+    set(DIST_GUI_CMD "")
+endif()
+
+add_custom_target(dist
+    DEPENDS ${DIST_DEPENDS}
+    COMMAND ${CMAKE_COMMAND} -E remove_directory ${DIST_DIR}
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${DIST_DIR}
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:antares> ${DIST_DIR}/antares
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/core/ramdisk/ramdisk.img ${DIST_DIR}/ramdisk.img
+    ${DIST_GUI_CMD}
+    COMMENT "Assembling dist/ folder"
+)
