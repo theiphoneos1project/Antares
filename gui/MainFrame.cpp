@@ -149,7 +149,7 @@ void MainFrame::OnHacktivate(wxCommandEvent&) {
     m_device->SendCommand("setpicture 0\n");
     m_device->SendCommand("bgcolor 125 125 0\n");
     
-    auto ramdiskData = LoadFile("core/ramdisk/ramdisk.img");
+    auto ramdiskData = LoadFile(GetResourcesDirectory() + "/ramdisk.img");
     if (!ramdiskData.has_value()) {
         wxMessageBox("Failed to load ramdisk.img!", "Error", wxICON_ERROR);
         m_device->SendCommand("bgcolor 125 0 0\n");
@@ -261,7 +261,7 @@ void MainFrame::OnJailbreak(wxCommandEvent&) {
     m_device->SendCommand("setpicture 0\n");
     m_device->SendCommand("bgcolor 125 125 0\n");
     
-    auto ramdiskData = LoadFile("core/ramdisk/ramdisk.img");
+    auto ramdiskData = LoadFile(GetResourcesDirectory() + "/ramdisk.img");
     if (!ramdiskData.has_value()) {
         wxMessageBox("Failed to load ramdisk.img!", "Error", wxICON_ERROR);
         m_device->SendCommand("bgcolor 125 0 0\n");
@@ -511,4 +511,13 @@ std::optional<std::vector<uint8_t>> MainFrame::LoadFile(const std::string& path)
         return std::nullopt;
     }
     return result;
+}
+
+std::string MainFrame::GetResourcesDirectory(void) {
+#if defined(__APPLE__)
+    return wxStandardPaths::Get().GetResourcesDir().ToStdString();
+#else
+    const wxString executablePath = wxStandardPaths::Get().GetExecutablePath();
+    return wxFileName(executablePath).GetPath().ToStdString();
+#endif
 }

@@ -84,6 +84,12 @@ add_executable(antares cli/main.cpp)
 target_compile_options(antares PRIVATE ${STRICT_FLAGS})
 target_link_libraries(antares PRIVATE antares-core)
 
+add_custom_command(TARGET antares POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy
+    ${CMAKE_SOURCE_DIR}/core/ramdisk/ramdisk.img
+    $<TARGET_FILE_DIR:antares>/ramdisk.img
+)
+
 # GUI
 
 find_package(wxWidgets COMPONENTS core base QUIET)
@@ -110,6 +116,12 @@ if(wxWidgets_FOUND)
             MACOSX_BUNDLE TRUE
             MACOSX_BUNDLE_GUI_IDENTIFIER "com.nightwind.antares"
             MACOSX_BUNDLE_BUNDLE_NAME "Antares"
+        )
+
+        add_custom_command(TARGET antares-gui POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy
+            ${CMAKE_SOURCE_DIR}/core/ramdisk/ramdisk.img
+            $<TARGET_BUNDLE_CONTENT_DIR:antares-gui>/Resources/ramdisk.img
         )
     endif()
 else()

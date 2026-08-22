@@ -31,6 +31,7 @@ private:
     
     static std::optional<std::string> GetMarketingProductName(std::string_view productType);
     static std::optional<std::vector<uint8_t>> LoadFile(const std::string& path);
+    static std::string GetResourcesDirectory(void);
 private:
     static constexpr uint32_t s_minimumWindowWidth = 362; 
     static constexpr uint32_t s_minimumWindowHeight = 450;

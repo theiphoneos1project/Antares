@@ -111,6 +111,12 @@ static bool EnsureDeviceInRecoveryMode(Device& device) {
     return true;
 }
 
+static std::string GetResourcesDirectory(void) {
+    char directory[PATH_MAX] = {0};
+    GetExecutableDirectory(directory, sizeof(directory));
+    return std::string(directory);
+}
+
 static void PrintUsage(void) {
     std::cout << "\n"
               << "_\\|/_ Antares Jailbreak CLI  \n"
@@ -158,7 +164,7 @@ int main(int argc, char *argv[]) {
         device.SendCommand("setpicture 0\n");
         device.SendCommand("bgcolor 125 125 0\n");
 
-        auto ramdiskData = LoadFile("core/ramdisk/ramdisk.img");
+        auto ramdiskData = LoadFile(GetResourcesDirectory() + "/ramdisk.img");
         if (!ramdiskData.has_value()) {
             std::cerr << "[-] Failed to load ramdisk.img\n";
             device.SendCommand("bgcolor 125 0 0\n");
@@ -194,7 +200,7 @@ int main(int argc, char *argv[]) {
         device.SendCommand("setpicture 0\n");
         device.SendCommand("bgcolor 125 125 0\n");
         
-        auto ramdiskData = LoadFile("core/ramdisk/ramdisk.img");
+        auto ramdiskData = LoadFile(GetResourcesDirectory() + "/ramdisk.img");
         if (!ramdiskData.has_value()) {
             std::cerr << "[-] Failed to load ramdisk.img\n";
             device.SendCommand("bgcolor 125 0 0\n");
