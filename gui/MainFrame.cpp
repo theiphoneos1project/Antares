@@ -125,6 +125,8 @@ MainFrame::MainFrame() :
 
     SetSizer(root);
     SetMinSize(wxSize(s_minimumWindowWidth, s_minimumWindowHeight));
+
+    RefreshUI();
     
     m_device = std::make_unique<Device>();
     if (!m_device) {
@@ -387,6 +389,7 @@ void MainFrame::OnJailbreak(wxCommandEvent&) {
 
 void MainFrame::OnTimerPoll(wxTimerEvent&) {
     if (m_lockdowndClient && m_lockdowndClient->IsOpen()) {
+        m_hacktivateItem->Enable(true);
         m_enterRecoveryItem->Enable(true);
         m_exitRecoveryItem->Enable(false);
         m_customBootCommandsItem->Enable(false);
@@ -407,6 +410,7 @@ void MainFrame::OnTimerPoll(wxTimerEvent&) {
     
     bool successfullyOpened = m_device->Open();
     if (!successfullyOpened) {
+        m_hacktivateItem->Enable(false);
         m_enterRecoveryItem->Enable(false);
         m_exitRecoveryItem->Enable(false);
         m_customBootCommandsItem->Enable(false);
@@ -419,6 +423,7 @@ void MainFrame::OnTimerPoll(wxTimerEvent&) {
     }
 
     if (!m_device->IsSupported()) {
+        m_hacktivateItem->Enable(false);
         m_enterRecoveryItem->Enable(false);
         m_exitRecoveryItem->Enable(false);
         m_customBootCommandsItem->Enable(false);
@@ -432,6 +437,7 @@ void MainFrame::OnTimerPoll(wxTimerEvent&) {
 
     auto mode = m_device->GetMode();
     if (!mode.has_value()) {
+        m_hacktivateItem->Enable(false);
         m_enterRecoveryItem->Enable(false);
         m_exitRecoveryItem->Enable(false);
         m_customBootCommandsItem->Enable(false);
@@ -450,6 +456,7 @@ void MainFrame::OnTimerPoll(wxTimerEvent&) {
             m_lockdowndClient = std::make_unique<LockdownDaemonClient>();
 
             if (!m_lockdowndClient->Open()) {
+                m_hacktivateItem->Enable(false);
                 m_enterRecoveryItem->Enable(false);
                 m_exitRecoveryItem->Enable(false);
                 m_customBootCommandsItem->Enable(false);
@@ -466,6 +473,7 @@ void MainFrame::OnTimerPoll(wxTimerEvent&) {
             std::string sessionError;
             auto sessionID = m_lockdowndClient->StartPairedSession(sessionError);
             if (!sessionID.has_value()) {
+                m_hacktivateItem->Enable(false);
                 m_enterRecoveryItem->Enable(false);
                 m_exitRecoveryItem->Enable(false);
                 m_customBootCommandsItem->Enable(false);
@@ -482,7 +490,8 @@ void MainFrame::OnTimerPoll(wxTimerEvent&) {
 
                 return;
             }
-
+            
+            m_hacktivateItem->Enable(true);
             m_enterRecoveryItem->Enable(true);
             m_exitRecoveryItem->Enable(false);
             m_customBootCommandsItem->Enable(false);
@@ -503,6 +512,7 @@ void MainFrame::OnTimerPoll(wxTimerEvent&) {
         } break;
         
         case Device::Mode::Recovery: {
+            m_hacktivateItem->Enable(true);
             m_enterRecoveryItem->Enable(false);
             m_exitRecoveryItem->Enable(true);
             m_customBootCommandsItem->Enable(true);
