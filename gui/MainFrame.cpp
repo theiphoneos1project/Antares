@@ -80,14 +80,16 @@ MainFrame::MainFrame() :
 
     root->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL), 0, wxEXPAND | wxALL, 15);
 
-    auto *creditText = new wxStaticText(this, wxID_ANY, "Special thanks to: EthanArbuckle, Zibri (ZiPhone)", wxDefaultPosition, wxDefaultSize);
-    root->Add(creditText, 0, wxLEFT, 15);
+    m_specialThanksText = new wxStaticText(this, wxID_ANY, "Special thanks to: forcequitOS, Zibri (ZiPhone), lex", wxDefaultPosition, wxDefaultSize);
+    root->Add(m_specialThanksText, 0, wxLEFT, 15);
 
     root->AddStretchSpacer(1);
     
     root->Add(new wxStaticText(this, wxID_ANY, "References:", wxDefaultPosition, wxDefaultSize), 0, wxLEFT, 15);
     root->Add(MakeCustomHyperlink("EthanArbuckle/iOS1.0-Jailbreak", "https://github.com/EthanArbuckle/iOS1.0-Jailbreak"), 0, wxLEFT, 15);
     root->Add(MakeCustomHyperlink("Zibri/ZiPhone", "https://github.com/Zibri/ZiPhone"), 0, wxLEFT, 15);
+    root->Add(MakeCustomHyperlink("forcequitOS", "https://github.com/forcequitOS"), 0, wxLEFT, 15);
+    root->Add(MakeCustomHyperlink("lex/Whitera1n writeup", "https://web.archive.org/web/20190228192547/http://whitera1n.com/ramdiskhackwriteup/"), 0, wxLEFT, 15);
     
     root->AddStretchSpacer(1);
     
@@ -162,13 +164,60 @@ void MainFrame::OnHacktivate(wxCommandEvent&) {
         return;
     }
 
+    bool isiPhone = false;
+
+    auto productType = m_device->RecoveryModeGetProductType();
+    if (productType.has_value()) {
+        isiPhone = *productType == "iPhone1,1";
+    } else {
+        isiPhone = wxMessageBox(
+            "Failed to detect device type. Is this an iPhone?",
+            "Warning",
+            wxYES_NO | wxICON_WARNING
+        ) == wxYES;
+    }
+
     m_device->SendCommand("setenv antares_hacktivate \"1\"\n");
 
     m_device->SendCommand("bgcolor 0 125 0\n");
 
-    m_device->SendCommand("setenv boot-args \"rd=md0 -s -x pmd0=0x09CC2000.0x0133D000\"\n");
-    m_device->SendCommand("saveenv\n");
-    m_device->SendCommand("fsboot\n");
+    if (isiPhone) {
+        m_device->SendCommand("setenv boot-args \"rd=md0 -s -x pmd0=0x09CC2000.0x0133D000\"\n");
+        m_device->SendCommand("saveenv\n");
+        m_device->SendCommand("fsboot\n");
+    } else {
+        auto newKernelcache = LoadFile(GetResourcesDirectory() + "/new_kernelcache");
+        if (!newKernelcache.has_value()) {
+            wxMessageBox("Failed to load new kernelcache!", "Error", wxICON_ERROR);
+            m_device->SendCommand("bgcolor 125 0 0\n");
+            return;
+        }
+        
+        if (!m_device->SendFile(*newKernelcache, 0x09000000)) {
+            wxMessageBox("Failed to send new kernelcache!", "Error", wxICON_ERROR);
+            m_device->SendCommand("bgcolor 125 0 0\n");
+            return;
+        }
+
+        auto oldKernelcache = LoadFile(GetResourcesDirectory() + "/old_kernelcache");
+        if (!oldKernelcache.has_value()) {
+            wxMessageBox("Failed to load old kernelcache!", "Error", wxICON_ERROR);
+            m_device->SendCommand("bgcolor 125 0 0\n");
+            return;
+        }
+        
+        if (!m_device->SendFile(*oldKernelcache, 0x09000000)) {
+            wxMessageBox("Failed to send old kernelcache!", "Error", wxICON_ERROR);
+            m_device->SendCommand("bgcolor 125 0 0\n");
+            return;
+        }
+
+        m_device->SendCommand("setenv boot-args \"rd=md0 -s -x pmd0=0x09CC2000.0x0133D000\"\n");
+        m_device->SendCommand("saveenv\n");
+        m_device->SendCommand("bootx\n");
+
+        m_device->SendCommand("fsboot\n");
+    }
 }
 
 void MainFrame::OnEnterRecovery(wxCommandEvent&) {
@@ -274,6 +323,19 @@ void MainFrame::OnJailbreak(wxCommandEvent&) {
         return;
     }
 
+    bool isiPhone = false;
+
+    auto productType = m_device->RecoveryModeGetProductType();
+    if (productType.has_value()) {
+        isiPhone = *productType == "iPhone1,1";
+    } else {
+        isiPhone = wxMessageBox(
+            "Failed to detect device type. Is this an iPhone?",
+            "Warning",
+            wxYES_NO | wxICON_WARNING
+        ) == wxYES;
+    }
+
     if (m_verboseBootCheckbox->IsChecked()) {
         m_device->SendCommand("setenv antares_verbose_boot \"1\"\n");
     } else {
@@ -284,9 +346,43 @@ void MainFrame::OnJailbreak(wxCommandEvent&) {
 
     m_device->SendCommand("bgcolor 0 125 0\n");
 
-    m_device->SendCommand("setenv boot-args \"rd=md0 -s -x pmd0=0x09CC2000.0x0133D000\"\n");
-    m_device->SendCommand("saveenv\n");
-    m_device->SendCommand("fsboot\n");
+    if (isiPhone) {
+        m_device->SendCommand("setenv boot-args \"rd=md0 -s -x pmd0=0x09CC2000.0x0133D000\"\n");
+        m_device->SendCommand("saveenv\n");
+        m_device->SendCommand("fsboot\n");
+    } else {
+        auto newKernelcache = LoadFile(GetResourcesDirectory() + "/new_kernelcache");
+        if (!newKernelcache.has_value()) {
+            wxMessageBox("Failed to load new kernelcache!", "Error", wxICON_ERROR);
+            m_device->SendCommand("bgcolor 125 0 0\n");
+            return;
+        }
+        
+        if (!m_device->SendFile(*newKernelcache, 0x09000000)) {
+            wxMessageBox("Failed to send new kernelcache!", "Error", wxICON_ERROR);
+            m_device->SendCommand("bgcolor 125 0 0\n");
+            return;
+        }
+
+        auto oldKernelcache = LoadFile(GetResourcesDirectory() + "/old_kernelcache");
+        if (!oldKernelcache.has_value()) {
+            wxMessageBox("Failed to load old kernelcache!", "Error", wxICON_ERROR);
+            m_device->SendCommand("bgcolor 125 0 0\n");
+            return;
+        }
+        
+        if (!m_device->SendFile(*oldKernelcache, 0x09000000)) {
+            wxMessageBox("Failed to send old kernelcache!", "Error", wxICON_ERROR);
+            m_device->SendCommand("bgcolor 125 0 0\n");
+            return;
+        }
+
+        m_device->SendCommand("setenv boot-args \"rd=md0 -s -x pmd0=0x09CC2000.0x0133D000\"\n");
+        m_device->SendCommand("saveenv\n");
+        m_device->SendCommand("bootx\n");
+
+        m_device->SendCommand("fsboot\n");
+    }
 }
 
 void MainFrame::OnTimerPoll(wxTimerEvent&) {
@@ -411,7 +507,14 @@ void MainFrame::OnTimerPoll(wxTimerEvent&) {
             m_exitRecoveryItem->Enable(true);
             m_customBootCommandsItem->Enable(true);
 
-            m_statusText->SetLabel("Device connected in recovery mode!");
+            auto productType = m_device->RecoveryModeGetProductType();
+            
+            if (productType.has_value()) {
+                auto marketingName = GetMarketingProductName(*productType);
+                m_statusText->SetLabel(wxString(marketingName.value_or(*productType) + " connected in recovery mode!"));
+            } else {
+                m_statusText->SetLabel("Device connected in recovery mode!");
+            }
             m_jailbreakButton->Enable(true);
         } break;
     }
@@ -421,6 +524,7 @@ void MainFrame::OnTimerPoll(wxTimerEvent&) {
 
 void MainFrame::RefreshUI(void) {
     m_statusText->Wrap(s_minimumWindowWidth - (30 * 2));
+    m_specialThanksText->Wrap(s_minimumWindowWidth - (30 * 2));
 
     Refresh();
     Layout();

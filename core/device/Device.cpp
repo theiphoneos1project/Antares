@@ -181,6 +181,25 @@ bool Device::SendFile(const std::vector<uint8_t>& data, uint32_t loadAddress) {
     return true;
 }
 
+std::optional<std::string> Device::RecoveryModeGetProductType(void) {
+    libusb_device *device = libusb_get_device(m_deviceHandle);
+    
+    libusb_device_descriptor descriptor;
+    if (libusb_get_device_descriptor(device, &descriptor) != LIBUSB_SUCCESS) {
+        return std::nullopt;
+    }
+
+    // RE'd from iTunesMobileDevice.dll from iTunes 7.5 (AMRecoveryModeDeviceGetProductType)
+    switch (descriptor.bcdDevice & 0xFF00) {
+        case 0x1100:
+            return "iPhone1,1";
+        case 0x2100:
+            return "iPod1,1";
+        default:
+            return std::nullopt;
+    }
+}
+
 std::optional<iboot_message_t> Device::SendControl(iboot_message_t *message) {
     int result;
     

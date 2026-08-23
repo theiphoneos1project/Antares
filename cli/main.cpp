@@ -119,9 +119,10 @@ static std::string GetResourcesDirectory(void) {
 
 static void PrintUsage(void) {
     std::cout << "\n"
-              << "_\\|/_ Antares Jailbreak CLI  \n"
-              << "\"/|\\\" iPhone OS 1.0-1.1.5  \n"
-              << "By Nightwind and EthanArbuckle  \n\n"
+              << "_\\|/_ Antares Jailbreak CLI\n"
+              << "\"/|\\\" iPhone OS 1.0-1.1.5\n"
+              << "By Nightwind and EthanArbuckle\n\n"
+              << "Special thanks to: forcequitOS, Zibri (ZiPhone), lex\n\n"
               << "Usage:\n"
               << "  ./antares --jailbreak\n"
               << "  ./antares --hacktivate\n"
@@ -177,7 +178,20 @@ int main(int argc, char *argv[]) {
             device.SendCommand("bgcolor 125 0 0\n");
             return EXIT_FAILURE;
         }
-
+        
+        bool isiPhone = false;
+        
+        auto productType = device.RecoveryModeGetProductType();
+        if (productType.has_value()) {
+            isiPhone = *productType == "iPhone1,1";
+        } else {
+            char response;
+            std::cout << "Failed to detect device type. Is this an iPhone? (Y/N): ";
+            std::cin >> response;
+            
+            isiPhone = response == 'Y';
+        }
+        
         device.SendCommand("setenv antares_jailbreak \"1\"\n");
 
         if (isVerboseBootEnabled) {
@@ -187,10 +201,52 @@ int main(int argc, char *argv[]) {
         }
 
         device.SendCommand("bgcolor 0 125 0\n");
+        
+        if (isiPhone) {
+            std::cout << "[+] iPhone detected, skipping kernelcache, booting right away...\n";
 
-        device.SendCommand("setenv boot-args \"rd=md0 -s -x pmd0=0x09CC2000.0x0133D000\"\n");
-        device.SendCommand("saveenv\n");
-        device.SendCommand("fsboot\n");
+            device.SendCommand("setenv boot-args \"rd=md0 -s -x pmd0=0x09CC2000.0x0133D000\"\n");
+            device.SendCommand("saveenv\n");
+            device.SendCommand("fsboot\n");
+        } else {
+            std::cout << "[+] Sending new kernelcache...\n";
+            
+            auto newKernelcache = LoadFile(GetResourcesDirectory() + "/new_kernelcache");
+            if (!newKernelcache.has_value()) {
+                std::cerr << "Failed to load new kernelcache!\n";
+                device.SendCommand("bgcolor 125 0 0\n");
+                return EXIT_FAILURE;
+            }
+            
+            std::cout << "[+] Sending old kernelcache...\n";
+            
+            if (!device.SendFile(*newKernelcache, 0x09000000)) {
+                std::cerr << "Failed to send new kernelcache!\n";
+                device.SendCommand("bgcolor 125 0 0\n");
+                return EXIT_FAILURE;
+            }
+            
+            auto oldKernelcache = LoadFile(GetResourcesDirectory() + "/old_kernelcache");
+            if (!oldKernelcache.has_value()) {
+                std::cerr << "Failed to load old kernelcache!\n";
+                device.SendCommand("bgcolor 125 0 0\n");
+                return EXIT_FAILURE;
+            }
+            
+            if (!device.SendFile(*oldKernelcache, 0x09000000)) {
+                std::cerr << "Failed to send old kernelcache!\n";
+                device.SendCommand("bgcolor 125 0 0\n");
+                return EXIT_FAILURE;
+            }
+            
+            std::cout << "[+] Booting...\n";
+
+            device.SendCommand("setenv boot-args \"rd=md0 -s -x pmd0=0x09CC2000.0x0133D000\"\n");
+            device.SendCommand("saveenv\n");
+            device.SendCommand("bootx\n");
+
+            device.SendCommand("fsboot\n");
+        }
     } else if (command == "--hacktivate") {
         bool inRecovery = EnsureDeviceInRecoveryMode(device);
         if (!inRecovery) {
@@ -212,7 +268,20 @@ int main(int argc, char *argv[]) {
             device.SendCommand("bgcolor 125 0 0\n");
             return EXIT_FAILURE;
         }
-
+        
+        bool isiPhone = false;
+        
+        auto productType = device.RecoveryModeGetProductType();
+        if (productType.has_value()) {
+            isiPhone = *productType == "iPhone1,1";
+        } else {
+            char response;
+            std::cout << "Failed to detect device type. Is this an iPhone? (Y/N): ";
+            std::cin >> response;
+            
+            isiPhone = response == 'Y';
+        }
+        
         device.SendCommand("setenv antares_hacktivate \"1\"\n");
 
         if (isVerboseBootEnabled) {
@@ -222,10 +291,52 @@ int main(int argc, char *argv[]) {
         }
 
         device.SendCommand("bgcolor 0 125 0\n");
+        
+        if (isiPhone) {
+            std::cout << "[+] iPhone detected, skipping kernelcache, booting right away...\n";
 
-        device.SendCommand("setenv boot-args \"rd=md0 -s -x pmd0=0x09CC2000.0x0133D000\"\n");
-        device.SendCommand("saveenv\n");
-        device.SendCommand("fsboot\n");
+            device.SendCommand("setenv boot-args \"rd=md0 -s -x pmd0=0x09CC2000.0x0133D000\"\n");
+            device.SendCommand("saveenv\n");
+            device.SendCommand("fsboot\n");
+        } else {
+            std::cout << "[+] Sending new kernelcache...\n";
+            
+            auto newKernelcache = LoadFile(GetResourcesDirectory() + "/new_kernelcache");
+            if (!newKernelcache.has_value()) {
+                std::cerr << "Failed to load new kernelcache!\n";
+                device.SendCommand("bgcolor 125 0 0\n");
+                return EXIT_FAILURE;
+            }
+            
+            std::cout << "[+] Sending old kernelcache...\n";
+            
+            if (!device.SendFile(*newKernelcache, 0x09000000)) {
+                std::cerr << "Failed to send new kernelcache!\n";
+                device.SendCommand("bgcolor 125 0 0\n");
+                return EXIT_FAILURE;
+            }
+            
+            auto oldKernelcache = LoadFile(GetResourcesDirectory() + "/old_kernelcache");
+            if (!oldKernelcache.has_value()) {
+                std::cerr << "Failed to load old kernelcache!\n";
+                device.SendCommand("bgcolor 125 0 0\n");
+                return EXIT_FAILURE;
+            }
+            
+            if (!device.SendFile(*oldKernelcache, 0x09000000)) {
+                std::cerr << "Failed to send old kernelcache!\n";
+                device.SendCommand("bgcolor 125 0 0\n");
+                return EXIT_FAILURE;
+            }
+            
+            std::cout << "[+] Booting...\n";
+
+            device.SendCommand("setenv boot-args \"rd=md0 -s -x pmd0=0x09CC2000.0x0133D000\"\n");
+            device.SendCommand("saveenv\n");
+            device.SendCommand("bootx\n");
+
+            device.SendCommand("fsboot\n");
+        }
     } else {
         std::cerr << "[-] Unknown command: " << command << "\n";
         PrintUsage();

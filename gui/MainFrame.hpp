@@ -46,6 +46,8 @@ private:
     wxMenuItem *m_customBootCommandsItem = nullptr;
 
     wxStaticText *m_statusText = nullptr;
+    wxStaticText *m_specialThanksText = nullptr;
+    
     wxCheckBox *m_verboseBootCheckbox = nullptr;
     wxButton *m_jailbreakButton = nullptr;
 

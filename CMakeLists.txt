@@ -86,8 +86,10 @@ target_link_libraries(antares PRIVATE antares-core)
 
 add_custom_command(TARGET antares POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy
-    ${CMAKE_SOURCE_DIR}/core/ramdisk/ramdisk.img
-    $<TARGET_FILE_DIR:antares>/ramdisk.img
+        ${CMAKE_SOURCE_DIR}/core/ramdisk/ramdisk.img
+        ${CMAKE_SOURCE_DIR}/core/ramdisk/old_kernelcache
+        ${CMAKE_SOURCE_DIR}/core/ramdisk/new_kernelcache
+        $<TARGET_FILE_DIR:antares>
 )
 
 # GUI
@@ -120,8 +122,18 @@ if(wxWidgets_FOUND)
 
         add_custom_command(TARGET antares-gui POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy
-            ${CMAKE_SOURCE_DIR}/core/ramdisk/ramdisk.img
-            $<TARGET_BUNDLE_CONTENT_DIR:antares-gui>/Resources/ramdisk.img
+                ${CMAKE_SOURCE_DIR}/core/ramdisk/ramdisk.img
+                ${CMAKE_SOURCE_DIR}/core/ramdisk/old_kernelcache
+                ${CMAKE_SOURCE_DIR}/core/ramdisk/new_kernelcache
+                $<TARGET_BUNDLE_CONTENT_DIR:antares-gui>/Resources
+        )
+    else()
+        add_custom_command(TARGET antares-gui POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy
+                ${CMAKE_SOURCE_DIR}/core/ramdisk/ramdisk.img
+                ${CMAKE_SOURCE_DIR}/core/ramdisk/old_kernelcache
+                ${CMAKE_SOURCE_DIR}/core/ramdisk/new_kernelcache
+                $<TARGET_FILE_DIR:antares-gui>
         )
     endif()
 else()
@@ -174,6 +186,8 @@ add_custom_target(dist
     COMMAND ${CMAKE_COMMAND} -E make_directory ${DIST_DIR}
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:antares> ${DIST_DIR}/antares
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/core/ramdisk/ramdisk.img ${DIST_DIR}/ramdisk.img
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/core/ramdisk/old_kernelcache ${DIST_DIR}/old_kernelcache
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/core/ramdisk/new_kernelcache ${DIST_DIR}/new_kernelcache
     ${DIST_GUI_CMD}
     COMMENT "Assembling dist/ folder"
 )

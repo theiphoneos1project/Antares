@@ -60,6 +60,8 @@ public:
     bool InitHandshake(void);
     bool SendCommand(std::string_view command);
     bool SendFile(const std::vector<uint8_t>& data, uint32_t loadAddress);
+
+    std::optional<std::string> RecoveryModeGetProductType(void);
 private:
     std::optional<iboot_message_t> SendControl(iboot_message_t *message);
 private:
