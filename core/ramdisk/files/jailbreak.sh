@@ -31,6 +31,14 @@ else
 	echo "[+] Apple File Conduit \"2\" is already enabled. Skipping..."
 fi
 
+if [ ! -f /mnt1/etc/syslog.conf ]; then
+	echo "[+] Enabling logging to /var/log/syslog"
+	cp /tmp/com.apple.syslogd.plist /mnt1/System/Library/LaunchDaemons/com.apple.syslogd.plist
+	cp /tmp/syslog.conf /mnt1/etc/syslog.conf
+else
+	echo "[+] Logging to /var/log/syslog already enabled. Skipping..."
+fi
+
 sleep 5
 
 echo "[+] Unmounting filesystems..."
