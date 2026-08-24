@@ -121,6 +121,8 @@ if(wxWidgets_FOUND)
         )
 
         add_custom_command(TARGET antares-gui POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E make_directory
+                $<TARGET_BUNDLE_CONTENT_DIR:antares-gui>/Resources
             COMMAND ${CMAKE_COMMAND} -E copy
                 ${CMAKE_SOURCE_DIR}/core/ramdisk/ramdisk.img
                 ${CMAKE_SOURCE_DIR}/core/ramdisk/old_kernelcache
