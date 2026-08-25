@@ -22,8 +22,16 @@ Download the relevant build for your operating system and architecture from the 
 - **Windows:**
     - Make sure to also install [Zadig](https://zadig.akeo.ie). Plug in your device. In Zadig, tick the "List All Devices" flag in the "Options" tab. Select the iPhone/iPod touch (Interface 1) and rebind the driver to `libusbK`. Put the device into recovery mode via Antares and make sure to also rebind the driver to `libusbK` there. Keep in mind that if you switch devices, you will have to run the same steps for that device as well. Then, if you switch back to the original device, the same proceduce needs to be performed again. If you have only one device on iPhone OS 1, you will not have to run the procedure multiple times.
 
-## How to compile manually:
-Ensure you have [CMake](https://cmake.org) and [vcpkg](https://vcpkg.io/en/) installed.
+## How to Compile Manually
+Ensure you have [CMake](https://cmake.org), [vcpkg](https://vcpkg.io/en/), and [Python](https://www.python.org) installed.
+
+To compile the ramdisk, please run:
+```
+cd core/ramdisk
+python3 get_dependencies.py
+python3 get_ziphone_ramdisk.py
+python3 repack_ramdisk.py
+```
 
 ### macOS (arm64)
 ```bash
@@ -51,7 +59,7 @@ cmake --build build/linux-x64 --target dist --clean-first
 Ensure you have [Visual Studio 17 2022](https://visualstudio.microsoft.com/vs/older-downloads/) installed. Make sure your environment is set up correctly. The build instructions assume you are using a PowerShell session with the Visual Studio Developer tools set up correctly. If `$VCPKG_ROOT` is not set up correctly, try entering the direct path to your `vcpkg` root.
 
 ```powershell
-cmake -B build/windows -G "Visual Studio 17 2022" -A x64 -DVCPKG_TARGET_TRIPLET=x64-windows -DVCPKG_OVERLAY_TRIPLETS=triplets -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT\scripts\buildsystems\vcpkg.cmake
+cmake -B build\windows -G "Visual Studio 17 2022" -A x64 -DVCPKG_TARGET_TRIPLET=x64-windows -DVCPKG_OVERLAY_TRIPLETS=triplets -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT\scripts\buildsystems\vcpkg.cmake
 
 cmake --build build\windows --target dist --clean-first
 ```
