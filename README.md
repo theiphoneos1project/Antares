@@ -23,7 +23,7 @@ Download the relevant build for your operating system and architecture from the 
     - Make sure to also install [Zadig](https://zadig.akeo.ie). Plug in your device. In Zadig, tick the "List All Devices" flag in the "Options" tab. Select the iPhone/iPod touch (Interface 1) and rebind the driver to `libusbK`. Put the device into recovery mode via Antares and make sure to also rebind the driver to `libusbK` there. Keep in mind that if you switch devices, you will have to run the same steps for that device as well. Then, if you switch back to the original device, the same proceduce needs to be performed again. If you have only one device on iPhone OS 1, you will not have to run the procedure multiple times.
 
 ## How to Compile Manually
-Ensure you have [CMake](https://cmake.org), [vcpkg](https://vcpkg.io/en/), and [Python](https://www.python.org) installed.
+Ensure you have [CMake](https://cmake.org), [vcpkg](https://vcpkg.io/en/), [7z](https://www.7-zip.org/download.html) and [Python](https://www.python.org) installed.
 
 To compile the ramdisk, please run:
 ```
