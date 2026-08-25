@@ -10,10 +10,10 @@ BASE_URL = "https://github.com/LukeZGD/daibutsuCFW/releases/download/latest/"
 XPWN_PATH = SCRIPT_DIR / "xpwn"
 
 OLD_KCACHE_PATH = SCRIPT_DIR / "old_kernelcache"
-OLD_KCACHE_URL: str = "https://github.com/Zibri/ZiPhone/blob/d7dca81b2707fe962f116b23bface18de88f4351/victor.dat"
+OLD_KCACHE_URL: str = "https://github.com/Zibri/ZiPhone/raw/d779b8517c0af7b5bca68232cab5f3466b50a1a7/victor.dat"
 
 NEW_KCACHE_PATH = SCRIPT_DIR / "new_kernelcache"
-NEW_KCACHE_URL: str = "https://github.com/Zibri/ZiPhone/blob/d7dca81b2707fe962f116b23bface18de88f4351/igor.dat"
+NEW_KCACHE_URL: str = "https://github.com/Zibri/ZiPhone/raw/d779b8517c0af7b5bca68232cab5f3466b50a1a7/igor.dat"
 
 def get_asset_name() -> str:
     system = platform.system()
