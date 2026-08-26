@@ -6,7 +6,7 @@ iPhone OS 1.0 - 1.1.5 untethered jailbreak for the original iPhone and iPod touc
 
 ## Information
 - **macOS**, **Linux**, and **Windows** are supported
-    - Older verisons of macOS may have trouble detecting the device in normal mode. Putting the device into recovery mode manually should allow you to jailbreak successfully.
+    - Older versions of macOS may have trouble detecting the device in normal mode. Putting the device into recovery mode manually should allow you to jailbreak successfully.
     - Antares was tested on Linux Mint. Mileage may vary with other distributions of Linux.
     - **Windows 10** and **11** are supported. You will need to manually rebind the USB drivers to `libusbK` with [Zadig](https://zadig.akeo.ie).
     - Hacktivation is supported with Antares, tested on both the original iPhone and iPod touch on every version of iPhone OS 1.
