@@ -188,6 +188,9 @@ void MainFrame::OnHacktivate(wxCommandEvent&) {
         m_device->SendCommand("saveenv\n");
         m_device->SendCommand("fsboot\n");
     } else {
+        m_device->SendCommand("setenv boot-args \"rd=md0 -s -x pmd0=0x09CC2000.0x0133D000\"\n");
+        m_device->SendCommand("saveenv\n");
+
         auto newKernelcache = LoadFile(GetResourcesDirectory() + "/new_kernelcache");
         if (!newKernelcache.has_value()) {
             wxMessageBox("Failed to load new kernelcache!", "Error", wxICON_ERROR);
@@ -200,6 +203,8 @@ void MainFrame::OnHacktivate(wxCommandEvent&) {
             m_device->SendCommand("bgcolor 125 0 0\n");
             return;
         }
+
+        m_device->SendCommand("bootx\n");
 
         auto oldKernelcache = LoadFile(GetResourcesDirectory() + "/old_kernelcache");
         if (!oldKernelcache.has_value()) {
@@ -214,8 +219,6 @@ void MainFrame::OnHacktivate(wxCommandEvent&) {
             return;
         }
 
-        m_device->SendCommand("setenv boot-args \"rd=md0 -s -x pmd0=0x09CC2000.0x0133D000\"\n");
-        m_device->SendCommand("saveenv\n");
         m_device->SendCommand("bootx\n");
 
         m_device->SendCommand("fsboot\n");
@@ -353,6 +356,9 @@ void MainFrame::OnJailbreak(wxCommandEvent&) {
         m_device->SendCommand("saveenv\n");
         m_device->SendCommand("fsboot\n");
     } else {
+        m_device->SendCommand("setenv boot-args \"rd=md0 -s -x pmd0=0x09CC2000.0x0133D000\"\n");
+        m_device->SendCommand("saveenv\n");
+
         auto newKernelcache = LoadFile(GetResourcesDirectory() + "/new_kernelcache");
         if (!newKernelcache.has_value()) {
             wxMessageBox("Failed to load new kernelcache!", "Error", wxICON_ERROR);
@@ -365,6 +371,8 @@ void MainFrame::OnJailbreak(wxCommandEvent&) {
             m_device->SendCommand("bgcolor 125 0 0\n");
             return;
         }
+
+        m_device->SendCommand("bootx\n");
 
         auto oldKernelcache = LoadFile(GetResourcesDirectory() + "/old_kernelcache");
         if (!oldKernelcache.has_value()) {
@@ -379,8 +387,6 @@ void MainFrame::OnJailbreak(wxCommandEvent&) {
             return;
         }
 
-        m_device->SendCommand("setenv boot-args \"rd=md0 -s -x pmd0=0x09CC2000.0x0133D000\"\n");
-        m_device->SendCommand("saveenv\n");
         m_device->SendCommand("bootx\n");
 
         m_device->SendCommand("fsboot\n");

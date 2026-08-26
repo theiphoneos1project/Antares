@@ -209,6 +209,9 @@ int main(int argc, char *argv[]) {
             device.SendCommand("saveenv\n");
             device.SendCommand("fsboot\n");
         } else {
+            device.SendCommand("setenv boot-args \"rd=md0 -s -x pmd0=0x09CC2000.0x0133D000\"\n");
+            device.SendCommand("saveenv\n");
+
             std::cout << "[+] Sending new kernelcache...\n";
             
             auto newKernelcache = LoadFile(GetResourcesDirectory() + "/new_kernelcache");
@@ -225,6 +228,8 @@ int main(int argc, char *argv[]) {
                 device.SendCommand("bgcolor 125 0 0\n");
                 return EXIT_FAILURE;
             }
+
+            device.SendCommand("bootx\n");
             
             auto oldKernelcache = LoadFile(GetResourcesDirectory() + "/old_kernelcache");
             if (!oldKernelcache.has_value()) {
@@ -240,9 +245,6 @@ int main(int argc, char *argv[]) {
             }
             
             std::cout << "[+] Booting...\n";
-
-            device.SendCommand("setenv boot-args \"rd=md0 -s -x pmd0=0x09CC2000.0x0133D000\"\n");
-            device.SendCommand("saveenv\n");
             device.SendCommand("bootx\n");
 
             device.SendCommand("fsboot\n");
@@ -299,6 +301,9 @@ int main(int argc, char *argv[]) {
             device.SendCommand("saveenv\n");
             device.SendCommand("fsboot\n");
         } else {
+            device.SendCommand("setenv boot-args \"rd=md0 -s -x pmd0=0x09CC2000.0x0133D000\"\n");
+            device.SendCommand("saveenv\n");
+
             std::cout << "[+] Sending new kernelcache...\n";
             
             auto newKernelcache = LoadFile(GetResourcesDirectory() + "/new_kernelcache");
@@ -316,6 +321,8 @@ int main(int argc, char *argv[]) {
                 return EXIT_FAILURE;
             }
             
+            device.SendCommand("bootx\n");
+            
             auto oldKernelcache = LoadFile(GetResourcesDirectory() + "/old_kernelcache");
             if (!oldKernelcache.has_value()) {
                 std::cerr << "Failed to load old kernelcache!\n";
@@ -330,9 +337,6 @@ int main(int argc, char *argv[]) {
             }
             
             std::cout << "[+] Booting...\n";
-
-            device.SendCommand("setenv boot-args \"rd=md0 -s -x pmd0=0x09CC2000.0x0133D000\"\n");
-            device.SendCommand("saveenv\n");
             device.SendCommand("bootx\n");
 
             device.SendCommand("fsboot\n");
