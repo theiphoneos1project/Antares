@@ -176,7 +176,7 @@ if(APPLE AND wxWidgets_FOUND)
     set(DIST_GUI_CMD COMMAND ${CMAKE_COMMAND} -E copy_directory $<TARGET_BUNDLE_DIR:antares-gui> ${DIST_DIR}/antares-gui.app)
 elseif(wxWidgets_FOUND)
     set(DIST_DEPENDS antares antares-gui)
-    set(DIST_GUI_CMD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:antares-gui> ${DIST_DIR}/antares-gui)
+    set(DIST_GUI_CMD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:antares-gui> ${DIST_DIR}/$<TARGET_FILE_NAME:antares-gui>)
 else()
     set(DIST_DEPENDS antares)
     set(DIST_GUI_CMD "")
@@ -186,7 +186,7 @@ add_custom_target(dist
     DEPENDS ${DIST_DEPENDS}
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${DIST_DIR}
     COMMAND ${CMAKE_COMMAND} -E make_directory ${DIST_DIR}
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:antares> ${DIST_DIR}/antares
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:antares> ${DIST_DIR}/$<TARGET_FILE_NAME:antares>
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/core/ramdisk/ramdisk.img ${DIST_DIR}/ramdisk.img
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/core/ramdisk/old_kernelcache ${DIST_DIR}/old_kernelcache
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/core/ramdisk/new_kernelcache ${DIST_DIR}/new_kernelcache
