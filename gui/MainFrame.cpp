@@ -31,6 +31,10 @@ MainFrame::MainFrame() :
         wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER | wxMAXIMIZE_BOX)
     )
 {
+#if defined(__linux__)
+    SetFont(wxFont(9, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
+#endif
+
     auto *menuBar = new wxMenuBar();
     auto *toolsMenu = new wxMenu();
     

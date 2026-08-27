@@ -34,7 +34,7 @@ private:
     static std::string GetResourcesDirectory(void);
 private:
     static constexpr uint32_t s_minimumWindowWidth = 362; 
-    static constexpr uint32_t s_minimumWindowHeight = 450;
+    static constexpr uint32_t s_minimumWindowHeight = 500;
 
     static constexpr auto RecoveryTimeout = std::chrono::seconds(15);
 
