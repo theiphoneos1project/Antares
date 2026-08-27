@@ -221,7 +221,6 @@ int main(int argc, char *argv[]) {
                 return EXIT_FAILURE;
             }
             
-            std::cout << "[+] Sending old kernelcache...\n";
             
             if (!device.SendFile(*newKernelcache, 0x09000000)) {
                 std::cerr << "Failed to send new kernelcache!\n";
@@ -230,6 +229,9 @@ int main(int argc, char *argv[]) {
             }
 
             device.SendCommand("bootx\n");
+            sleep(1);
+            
+            std::cout << "[+] Sending old kernelcache...\n";
             
             auto oldKernelcache = LoadFile(GetResourcesDirectory() + "/old_kernelcache");
             if (!oldKernelcache.has_value()) {
@@ -313,7 +315,6 @@ int main(int argc, char *argv[]) {
                 return EXIT_FAILURE;
             }
             
-            std::cout << "[+] Sending old kernelcache...\n";
             
             if (!device.SendFile(*newKernelcache, 0x09000000)) {
                 std::cerr << "Failed to send new kernelcache!\n";
@@ -322,6 +323,9 @@ int main(int argc, char *argv[]) {
             }
             
             device.SendCommand("bootx\n");
+            sleep(1);
+            
+            std::cout << "[+] Sending old kernelcache...\n";
             
             auto oldKernelcache = LoadFile(GetResourcesDirectory() + "/old_kernelcache");
             if (!oldKernelcache.has_value()) {

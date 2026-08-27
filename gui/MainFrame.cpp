@@ -209,6 +209,7 @@ void MainFrame::OnHacktivate(wxCommandEvent&) {
         }
 
         m_device->SendCommand("bootx\n");
+        sleep(1);
 
         auto oldKernelcache = LoadFile(GetResourcesDirectory() + "/old_kernelcache");
         if (!oldKernelcache.has_value()) {
@@ -377,6 +378,7 @@ void MainFrame::OnJailbreak(wxCommandEvent&) {
         }
 
         m_device->SendCommand("bootx\n");
+        sleep(1);
 
         auto oldKernelcache = LoadFile(GetResourcesDirectory() + "/old_kernelcache");
         if (!oldKernelcache.has_value()) {
