@@ -1,5 +1,7 @@
 #include "MainFrame.hpp"
 
+#include "../platform.h"
+
 #include <fstream>
 #include <thread>
 
@@ -209,7 +211,7 @@ void MainFrame::OnHacktivate(wxCommandEvent&) {
         }
 
         m_device->SendCommand("bootx\n");
-        sleep(1);
+        usleep(1'000'000);
 
         auto oldKernelcache = LoadFile(GetResourcesDirectory() + "/old_kernelcache");
         if (!oldKernelcache.has_value()) {
@@ -378,7 +380,7 @@ void MainFrame::OnJailbreak(wxCommandEvent&) {
         }
 
         m_device->SendCommand("bootx\n");
-        sleep(1);
+        usleep(1'000'000);
 
         auto oldKernelcache = LoadFile(GetResourcesDirectory() + "/old_kernelcache");
         if (!oldKernelcache.has_value()) {

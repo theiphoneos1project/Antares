@@ -5,6 +5,7 @@
 #include <thread>
 #include "device/Device.hpp"
 #include "lockdownd/LockdownDaemonClient.hpp"
+#include "../platform.h"
 
 static constexpr auto RecoveryTimeout = std::chrono::seconds(15);
 
@@ -229,7 +230,7 @@ int main(int argc, char *argv[]) {
             }
 
             device.SendCommand("bootx\n");
-            sleep(1);
+            usleep(1'000'000);
             
             std::cout << "[+] Sending old kernelcache...\n";
             
@@ -323,7 +324,7 @@ int main(int argc, char *argv[]) {
             }
             
             device.SendCommand("bootx\n");
-            sleep(1);
+            usleep(1'000'000);
             
             std::cout << "[+] Sending old kernelcache...\n";
             
