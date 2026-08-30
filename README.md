@@ -18,6 +18,7 @@ Download the relevant build for your operating system and architecture from the 
     - For the CLI, make sure to run `chmod +x /path/to/binary` after downloading. If possible, run via `sudo` in order to force Antares's USB implementation to take priority over macOS. 
     - For the GUI, make sure to try running it for the first time, allowing it to run in Privacy & Security, and then running it again.
 - **Linux**:
+    - Make sure `libwxgtk3.2-dev` is installed from your package manager.
     - For both the CLI and GUI, make sure to run `chmod +x /path/to/binary` after downloading. Make sure to run via `sudo` in order for Antares to be able to temporarily disable `usbmuxd` and replace it with its own implementation while it is running.
 - **Windows:**
     - Make sure to also install [Zadig](https://zadig.akeo.ie). Plug in your device. In Zadig, tick the "List All Devices" flag in the "Options" tab. Select the iPhone/iPod touch (Interface 1) and rebind the driver to `libusbK`. Put the device into recovery mode via Antares and make sure to also rebind the driver to `libusbK` there. Keep in mind that if you switch devices, you will have to run the same steps for that device as well. Then, if you switch back to the original device, the same proceduce needs to be performed again. If you have only one device on iPhone OS 1, you will not have to run the procedure multiple times.
