@@ -127,6 +127,9 @@ static void PrintUsage(void) {
               << "Usage:\n"
               << "  ./antares --jailbreak\n"
               << "  ./antares --hacktivate\n"
+              << "  ./antares --enter-recovery\n"
+              << "  ./antares --exit-recovery\n"
+              << "  ./antares --boot-commands\n\n"
               << "Add --verbose as your last argument for verbose boot.\n\n";
 }
 
@@ -345,6 +348,68 @@ int main(int argc, char *argv[]) {
             device.SendCommand("bootx\n");
 
             device.SendCommand("fsboot\n");
+        }
+    } else if (command == "--exit-recovery") {
+        auto mode = device.GetMode();
+        if (!mode.has_value() || *mode != Device::Mode::Recovery) {
+            std::cout << "[-] Device is not in recovery mode!\n";
+            return EXIT_FAILURE;
+        }
+
+        std::cout << "[+] Exiting recovery mode...\n";
+
+        if (isVerboseBootEnabled) {
+            device.SendCommand("setenv boot-args \"rd=disk0s1 -v\"\n");
+        } else {
+            device.SendCommand("setenv boot-args \"rd=disk0s1\"\n");
+        }
+
+        device.SendCommand("setenv boot-partition 0\n");
+        device.SendCommand("setenv auto-boot true\n");
+        device.SendCommand("saveenv\n");
+            
+        std::cout << "[+] Booting...\n";
+        device.SendCommand("reboot\n");
+    } else if (command == "--enter-recovery") {
+        bool inRecovery = EnsureDeviceInRecoveryMode(device);
+        if (!inRecovery) {
+            return EXIT_FAILURE;
+        }
+
+        std::cout << "[+] Success!\n";
+    } else if (command == "--boot-commands") {
+        auto mode = device.GetMode();
+        if (!mode.has_value() || *mode != Device::Mode::Recovery) {
+            std::cout << "[-] Device is not in recovery mode!\n";
+            return EXIT_FAILURE;
+        }
+
+        std::cout << "\nSending custom boot commands. Type 'exit' to quit.\n";
+
+        std::string bootCommand;
+        while (true) {
+            std::cout << "> ";
+            if (!std::getline(std::cin, bootCommand)) {
+                break;
+            }
+
+            if (bootCommand.empty()) {
+                continue;
+            }
+
+            if (bootCommand == "exit") {
+                break;
+            }
+
+            bool success = device.SendCommand(bootCommand + "\n");
+            if (!success) {
+                std::cerr << "! Command failed!\n";
+                continue;
+            }
+
+            if (bootCommand == "fsboot" || bootCommand == "reboot" || bootCommand == "reset" || bootCommand == "poweroff") {
+                break;
+            }
         }
     } else {
         std::cerr << "[-] Unknown command: " << command << "\n";
