@@ -256,6 +256,13 @@ int main(int argc, char *argv[]) {
             device.SendCommand("fsboot\n");
         }
     } else if (command == "--hacktivate") {
+        std::cout << "Are you sure you want to hacktivate your device? There may be unintended consequences. (y/N): ";
+        char confirm;
+        std::cin >> confirm;
+        if (confirm != 'y' && confirm != 'Y') {
+            return EXIT_SUCCESS;
+        }
+
         bool inRecovery = EnsureDeviceInRecoveryMode(device);
         if (!inRecovery) {
             return EXIT_FAILURE;
