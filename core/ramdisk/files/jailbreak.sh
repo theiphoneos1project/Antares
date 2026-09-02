@@ -39,6 +39,24 @@ else
 	echo "[+] Logging to /var/log/syslog already enabled. Skipping..."
 fi
 
+if [ ! -f /mnt1/usr/sbin/PXLdaemon ]; then
+	echo "[+] Adding PXL daemon..."
+
+	if [ ! -d /mnt1/etc/init.d ]; then
+		echo "[+] /etc/init.d doesn't exist, creating..."
+		mkdir /mnt1/etc/init.d
+	fi
+
+	cp /tmp/hackinit.sh /mnt1/etc/hackinit.sh
+	cp /tmp/pxl.sh /mnt1/etc/init.d/pxl.sh
+	cp /tmp/PXLdaemon /mnt1/usr/sbin/PXLdaemon
+	cp /tmp/com.apple.update.plist.hackinit /mnt1/System/Library/LaunchDaemons/com.apple.update.plist
+
+	chmod +x /mnt1/usr/sbin/PXLdaemon
+else
+	echo "[+] PXLdaemon already installed. Skipping..."
+fi
+
 sleep 5
 
 echo "[+] Unmounting filesystems..."
@@ -52,6 +70,6 @@ echo "[+] Done setting up."
 echo
 echo "======================================="
 echo "           !!! Attention !!!           "
-echo "If you want to fully bootstrap your device, make sure to install the PXLdaemon and install the BSD base package."
+echo "If you want to fully bootstrap your device, make sure to install the BSD base package."
 echo "======================================="   
 echo

@@ -91,6 +91,7 @@ def main() -> None:
 
     CHANGED_FILES = [
         (RAMDISK_ROOT_PATH / "ZiPhone Ramdisk" / "etc" / "profile", "/etc/profile"),
+        (RAMDISK_ROOT_PATH / "ZiPhone Ramdisk" / "zib" / "PXLdaemon-1.0-1.1.5", "/tmp/PXLdaemon"),
         (FILES_PATH / "profile", "/etc/profile")
     ]
 
