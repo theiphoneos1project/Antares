@@ -1,10 +1,18 @@
-# Antares
-iPhone OS 1.0 - 1.1.5 untethered jailbreak for the original iPhone and iPod touch.
+<img align="left" width="100" height="100" src="icons/Icon.ico" alt="logo" style="float: left;"/>
+
+<h3 align="left">
+    Antares 
+    <br />
+    iPhone OS 1.0 - 1.1.5 untethered jailbreak for the original iPhone and iPod touch.
+    <div align="right" style="float: top;" />
+    <br />
+</h3> 
+
+## Information
 
 > [!WARNING]
 > There is no warranty for this software. Use it at your own risk.
 
-## Information
 - **macOS**, **Linux**, and **Windows** are supported
     - Older versions of macOS may have trouble detecting the device in normal mode. Putting the device into recovery mode manually should allow you to jailbreak successfully.
     - Antares was tested on Linux Mint. Mileage may vary with other distributions of Linux.
