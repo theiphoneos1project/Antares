@@ -1,6 +1,7 @@
 #include "MainFrame.hpp"
 #include "USBGuards.hpp"
 #include <wx/snglinst.h>
+#include <wx/icon.h>
 #include <memory>
 
 class App : public wxApp {
@@ -40,6 +41,9 @@ public:
 #endif
 
         auto *frame = new MainFrame();
+#ifdef _WIN32
+        frame->SetIcon(wxICON(IDI_ICON1));
+#endif
         frame->Show();
         return true;
     }

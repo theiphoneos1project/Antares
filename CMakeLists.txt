@@ -129,6 +129,14 @@ if(wxWidgets_FOUND)
                 ${CMAKE_SOURCE_DIR}/core/ramdisk/new_kernelcache
                 $<TARGET_BUNDLE_CONTENT_DIR:antares-gui>/Resources
         )
+
+        target_sources(antares-gui PRIVATE ${CMAKE_SOURCE_DIR}/icons/Icon.icns)
+        set_target_properties(antares-gui PROPERTIES
+            MACOSX_BUNDLE_ICON_FILE Icon.icns
+        )
+        set_source_files_properties(${CMAKE_SOURCE_DIR}/icons/Icon.icns PROPERTIES
+            MACOSX_PACKAGE_LOCATION Resources
+        )
     else()
         add_custom_command(TARGET antares-gui POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy
@@ -137,6 +145,10 @@ if(wxWidgets_FOUND)
                 ${CMAKE_SOURCE_DIR}/core/ramdisk/new_kernelcache
                 $<TARGET_FILE_DIR:antares-gui>
         )
+    endif()
+
+    if(WIN32)
+        target_sources(antares-gui PRIVATE ${CMAKE_SOURCE_DIR}/gui/antares-gui.rc)
     endif()
 else()
     message(STATUS "wxWidgets not found, skipping GUI target")
