@@ -3,7 +3,7 @@
 <h3 align="left">
     Antares 
     <br />
-    iPhone OS 1.0 - 1.1.5 untethered jailbreak for the original iPhone and iPod touch.
+    iPhone OS 1.0 - 1.1.5 untethered jailbreak for iPhone and iPod touch.
     <div align="right" style="float: top;" />
     <br />
 </h3> 
