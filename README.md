@@ -83,4 +83,13 @@ cmake --build build\windows --target dist --clean-first
 ## Copyright
 This project is licensed under [MIT](LICENSE).
 
+### Media and Asset Licenses
+The project icon and associated visual assets are licensed under [CC BY-NC-SA 3.0](https://creativecommons.org). 
+
+The icon incorporates elements from the following third-party works:
+* "Giant Red Star 3" by Viktor Hahn, used under [CC BY-SA 3.0](https://creativecommons.org) / Blended and color-edited.
+* "Red Giant" by [PaulineMoss on DeviantArt](https://deviantart.com), used under [CC BY-NC 3.0](https://creativecommons.org).
+* "Silhouette vector clip art of unlocked padlock symbol" via [PublicDomainVectors.org](https://publicdomainvectors.org) (Dedicated to the Public Domain).
+* "Stars sky space background" via [PublicDomainPictures.net](https://publicdomainpictures.net) (Dedicated to the Public Domain).
+
 ###### Copyright (c) 2026 Nightwind
