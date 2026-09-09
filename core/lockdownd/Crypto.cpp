@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2026 Nightwind
+//
+
 #include "Crypto.hpp"
 
 #include <openssl/bio.h>

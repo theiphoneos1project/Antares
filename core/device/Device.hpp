@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2026 Nightwind
+//
+
 #ifndef DEVICE_H
 #define DEVICE_H
 

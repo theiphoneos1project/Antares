@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2026 Nightwind
+//
+
 #ifndef LOCKDOWNDAEMONCLIENT_H
 #define LOCKDOWNDAEMONCLIENT_H
 

@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2026 Nightwind
+//
+
 #include "MainFrame.hpp"
 #include "USBGuards.hpp"
 #include <wx/snglinst.h>

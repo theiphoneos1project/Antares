@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2026 Nightwind
+//
+
 #ifndef PLATFORM_H
 #define PLATFORM_H
 

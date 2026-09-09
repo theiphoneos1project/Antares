@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2026 Nightwind
+//
+
 #ifndef CRYPTO_H
 #define CRYPTO_H
 

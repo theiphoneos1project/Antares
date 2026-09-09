@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2026 Nightwind
+//
+
 #include "Device.hpp"
 #include <iostream>
 #include <cstring>

@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2026 Nightwind
+//
+
 #include "LockdownDaemonClient.hpp"
 #include "Crypto.hpp"
 #include <limits.h>

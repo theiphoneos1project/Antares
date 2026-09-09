@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2026 Nightwind
+//
+
 #ifndef USBGUARD_H
 #define USBGUARD_H
 

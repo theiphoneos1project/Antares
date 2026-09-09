@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2026 Nightwind
+//
+
 #ifndef MAINFRAME_H
 #define MAINFRAME_H
 
