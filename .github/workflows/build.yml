@@ -149,3 +149,53 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: Antares_Linux_x64.zip
+
+  windows:
+    runs-on: windows-2022
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+          vsversion: '2022'
+
+      - name: Install vcpkg
+        run: |
+          git clone https://github.com/microsoft/vcpkg.git C:\tools\vcpkg
+          C:\tools\vcpkg\bootstrap-vcpkg.bat
+          echo "VCPKG_ROOT=C:\tools\vcpkg" >> $env:GITHUB_ENV
+
+      - name: Cache vcpkg
+        uses: actions/cache@v4
+        with:
+          path: C:\tools\vcpkg\installed
+          key: vcpkg-windows-x64-${{ hashFiles('vcpkg.json') }}
+
+      - name: Build ramdisk
+        run: |
+          cd core/ramdisk
+          python3 get_dependencies.py
+          python3 get_ziphone_ramdisk.py
+          python3 repack_ramdisk.py
+
+      - name: Build
+        run: |
+          cmake -B build -G "Visual Studio 17 2022" -A x64 -DVCPKG_TARGET_TRIPLET=x64-windows -DVCPKG_OVERLAY_TRIPLETS=triplets "-DCMAKE_TOOLCHAIN_FILE=C:\tools\vcpkg\scripts\buildsystems\vcpkg.cmake"
+          cmake --build build --target dist --config Release --clean-first
+
+      - name: Zip
+        run: Rename-Item dist Antares_Windows_x64; Compress-Archive Antares_Windows_x64 Antares_Windows_x64.zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: antares-windows-x64
+          path: Antares_Windows_x64.zip
+
+      - name: Upload to release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: Antares_Windows_x64.zip
