@@ -1,0 +1,151 @@
+name: Build
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  macos-arm64:
+    runs-on: macos-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: brew install autoconf autoconf-archive automake libtool
+
+      - name: Install vcpkg
+        run: |
+          git clone https://github.com/microsoft/vcpkg.git $HOME/vcpkg
+          $HOME/vcpkg/bootstrap-vcpkg.sh
+          echo "VCPKG_ROOT=$HOME/vcpkg" >> $GITHUB_ENV
+
+      - name: Cache vcpkg
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.VCPKG_ROOT }}/installed
+          key: vcpkg-macos-arm64-${{ hashFiles('vcpkg.json') }}
+
+      - name: Build ramdisk
+        run: |
+          cd core/ramdisk
+          python3 get_dependencies.py
+          python3 get_ziphone_ramdisk.py
+          python3 repack_ramdisk.py
+
+      - name: Build
+        run: |
+          cmake -B build -G "Unix Makefiles" -DCMAKE_OSX_ARCHITECTURES=arm64 -DVCPKG_TARGET_TRIPLET=arm64-osx -DVCPKG_OVERLAY_TRIPLETS=triplets -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake
+          cmake --build build --target dist --clean-first
+
+      - name: Zip
+        run: mv dist Antares_macOS_arm64 && zip -r Antares_macOS_arm64.zip Antares_macOS_arm64
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: antares-macos-arm64
+          path: Antares_macOS_arm64.zip
+
+      - name: Upload to release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: Antares_macOS_arm64.zip
+
+  macos-x64:
+    runs-on: macos-15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: brew install autoconf autoconf-archive automake libtool
+
+      - name: Install vcpkg
+        run: |
+          git clone https://github.com/microsoft/vcpkg.git $HOME/vcpkg
+          $HOME/vcpkg/bootstrap-vcpkg.sh
+          echo "VCPKG_ROOT=$HOME/vcpkg" >> $GITHUB_ENV
+
+      - name: Cache vcpkg
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.VCPKG_ROOT }}/installed
+          key: vcpkg-macos-x64-${{ hashFiles('vcpkg.json') }}
+
+      - name: Build ramdisk
+        run: |
+          cd core/ramdisk
+          python3 get_dependencies.py
+          python3 get_ziphone_ramdisk.py
+          python3 repack_ramdisk.py
+
+      - name: Build
+        run: |
+          cmake -B build -G "Unix Makefiles" -DCMAKE_OSX_ARCHITECTURES=x86_64 -DVCPKG_TARGET_TRIPLET=x64-osx -DVCPKG_OVERLAY_TRIPLETS=triplets -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake
+          cmake --build build --target dist --clean-first
+
+      - name: Zip
+        run: mv dist Antares_macOS_x64 && zip -r Antares_macOS_x64.zip Antares_macOS_x64
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: antares-macos-x64
+          path: Antares_macOS_x64.zip
+
+      - name: Upload to release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: Antares_macOS_x64.zip
+
+  linux:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: sudo apt-get install -y libwxgtk3.2-dev libusb-1.0-0-dev autoconf autoconf-archive automake libtool libudev-dev pkg-config build-essential
+
+      - name: Install vcpkg
+        run: |
+          git clone https://github.com/microsoft/vcpkg.git $HOME/vcpkg
+          $HOME/vcpkg/bootstrap-vcpkg.sh
+          echo "VCPKG_ROOT=$HOME/vcpkg" >> $GITHUB_ENV
+
+      - name: Cache vcpkg
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.VCPKG_ROOT }}/installed
+          key: vcpkg-linux-x64-${{ hashFiles('vcpkg.json') }}
+
+      - name: Build ramdisk
+        run: |
+          cd core/ramdisk
+          python3 get_dependencies.py
+          python3 get_ziphone_ramdisk.py
+          python3 repack_ramdisk.py
+
+      - name: Build
+        run: |
+          cmake -B build -G "Unix Makefiles" -DVCPKG_TARGET_TRIPLET=x64-linux -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake -DwxWidgets_CONFIG_EXECUTABLE=$(which wx-config)
+          cmake --build build --target dist --clean-first
+
+      - name: Zip
+        run: mv dist Antares_Linux_x64 && zip -r Antares_Linux_x64.zip Antares_Linux_x64
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: antares-linux-x64
+          path: Antares_Linux_x64.zip
+
+      - name: Upload to release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: Antares_Linux_x64.zip
