@@ -70,7 +70,7 @@ Ensure you have [Visual Studio 17 2022](https://visualstudio.microsoft.com/vs/ol
 ```powershell
 cmake -B build\windows -G "Visual Studio 17 2022" -A x64 -DVCPKG_TARGET_TRIPLET=x64-windows -DVCPKG_OVERLAY_TRIPLETS=triplets -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT\scripts\buildsystems\vcpkg.cmake
 
-cmake --build build\windows --target dist --clean-first
+cmake --build build\windows --target dist --config Release --clean-first
 ```
 
 ## Credits
